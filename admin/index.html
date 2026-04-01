@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Licencias Bot WhatsApp</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f0f2f5; color: #333; }
+        header { background: #128C7E; color: white; padding: 20px; text-align: center; }
+        header h1 { font-size: 24px; }
+        header p { font-size: 14px; opacity: 0.8; margin-top: 5px; }
+        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+        .card { background: white; border-radius: 10px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .card h2 { color: #128C7E; margin-bottom: 20px; font-size: 18px; border-bottom: 2px solid #f0f2f5; padding-bottom: 10px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; color: #555; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; margin-bottom: 15px; }
+        .btn { color: white; border: none; padding: 12px 25px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; }
+        .btn-verde { background: #128C7E; width: 100%; padding: 15px; font-size: 16px; }
+        .btn-verde:hover { background: #0e6b5e; }
+        .btn-rojo { background: #ff4444; }
+        .btn-gris { background: #888; }
+        .alerta { padding: 12px; border-radius: 6px; margin-bottom: 15px; display: none; text-align: center; font-weight: bold; }
+        .alerta.ok { background: #d4edda; color: #155724; }
+        .alerta.error { background: #f8d7da; color: #721c24; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { background: #f0f2f5; padding: 10px; text-align: left; font-weight: bold; color: #555; }
+        td { padding: 10px; border-bottom: 1px solid #f0f2f5; vertical-align: middle; }
+        tr:hover td { background: #fafafa; }
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        .badge.activa { background: #d4edda; color: #155724; }
+        .badge.vencida { background: #f8d7da; color: #721c24; }
+        .badge.inactiva { background: #e2e3e5; color: #555; }
+        .codigo { font-family: monospace; font-size: 13px; font-weight: bold; background: #f0f2f5; padding: 5px 8px; border-radius: 6px; letter-spacing: 1px; }
+        .resumen { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+        .resumen-card { background: white; border-radius: 10px; padding: 20px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .resumen-card .numero { font-size: 36px; font-weight: bold; color: #128C7E; }
+        .resumen-card .etiqueta { font-size: 14px; color: #888; margin-top: 5px; }
+        .acciones { display: flex; gap: 5px; }
+        .resultado-licencia { background: #f0f9f6; border: 2px solid #128C7E; border-radius: 8px; padding: 20px; margin-top: 15px; display: none; }
+        .codigo-grande { font-family: monospace; font-size: 22px; font-weight: bold; color: #128C7E; letter-spacing: 3px; text-align: center; padding: 15px; background: white; border-radius: 6px; margin: 10px 0; border: 2px dashed #128C7E; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Panel de Administracion</h1>
+        <p>Gestion de licencias - Bot WhatsApp</p>
+    </header>
+
+    <div class="container">
+
+        <!-- RESUMEN -->
+        <div class="resumen">
+            <div class="resumen-card">
+                <div class="numero" id="total-activas">0</div>
+                <div class="etiqueta">Licencias activas</div>
+            </div>
+            <div class="resumen-card">
+                <div class="numero" id="total-vencidas">0</div>
+                <div class="etiqueta">Licencias vencidas</div>
+            </div>
+            <div class="resumen-card">
+                <div class="numero" id="total-todas">0</div>
+                <div class="etiqueta">Total licencias</div>
+            </div>
+        </div>
+
+        <!-- GENERAR LICENCIA -->
+        <div class="card">
+            <h2>Generar nueva licencia</h2>
+            <div class="alerta" id="alerta-crear"></div>
+            <label>Nombre del negocio o cliente</label>
+            <input type="text" id="negocio" placeholder="Ej: Veterinaria Lopez">
+            <label>Plan</label>
+            <select id="tipo">
+                <option value="prueba">Prueba — 7 dias</option>
+                <option value="mensual">Mensual — 30 dias</option>
+                <option value="trimestral">Trimestral — 90 dias</option>
+                <option value="semestral">Semestral — 180 dias</option>
+                <option value="anual">Anual — 365 dias</option>
+            </select>
+            <button class="btn btn-verde" onclick="generarLicencia()">Generar licencia</button>
+            <div class="resultado-licencia" id="resultado-licencia">
+                <p style="text-align:center;color:#555;margin-bottom:5px">Licencia generada exitosamente</p>
+                <div class="codigo-grande" id="codigo-generado"></div>
+                <p style="text-align:center;font-size:13px;color:#888">Comparte este codigo con tu cliente para que lo ingrese en su panel</p>
+            </div>
+        </div>
+
+        <!-- LISTA DE LICENCIAS -->
+        <div class="card">
+            <h2>Todas las licencias
+                <button class="btn btn-gris" style="float:right;padding:8px 15px;font-size:13px" onclick="cargarLicencias()">Refrescar</button>
+            </h2>
+            <div class="alerta" id="alerta-lista"></div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Codigo</th>
+                        <th>Negocio</th>
+                        <th>Plan</th>
+                        <th>Numero WhatsApp</th>
+                        <th>Activada</th>
+                        <th>Vencimiento</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-licencias"></tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <script>
+        const API = 'http://localhost:3001/api/admin'
+
+        async function generarLicencia() {
+            const negocio = document.getElementById('negocio').value.trim()
+            const tipo = document.getElementById('tipo').value
+            if (!negocio) { alert('Por favor ingresa el nombre del negocio'); return }
+
+            const res = await fetch(API + '/licencias/crear', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ negocio, tipo })
+            })
+            const data = await res.json()
+
+            if (data.ok) {
+                document.getElementById('codigo-generado').textContent = data.codigo
+                document.getElementById('resultado-licencia').style.display = 'block'
+                document.getElementById('negocio').value = ''
+                mostrarAlerta('alerta-crear', true, 'Licencia creada correctamente')
+                cargarLicencias()
+            } else {
+                mostrarAlerta('alerta-crear', false, data.mensaje)
+            }
+        }
+
+        async function desactivarLicencia(codigo) {
+            if (!confirm('Desactivar licencia ' + codigo + '?')) return
+            const res = await fetch(API + '/licencias/desactivar/' + codigo, { method: 'POST' })
+            const data = await res.json()
+            mostrarAlerta('alerta-lista', data.ok, data.mensaje)
+            cargarLicencias()
+        }
+
+        async function cargarLicencias() {
+            try {
+                const licencias = await fetch(API + '/licencias').then(r => r.json())
+                const ahora = new Date()
+
+                const activas = licencias.filter(l => l.activa && new Date(l.vencimiento) > ahora)
+                const vencidas = licencias.filter(l => !l.activa || new Date(l.vencimiento) <= ahora)
+
+                document.getElementById('total-activas').textContent = activas.length
+                document.getElementById('total-vencidas').textContent = vencidas.length
+                document.getElementById('total-todas').textContent = licencias.length
+
+                const tbody = document.getElementById('tabla-licencias')
+                tbody.innerHTML = licencias.length === 0
+                    ? '<tr><td colspan="8" style="text-align:center;color:#888">No hay licencias generadas aun</td></tr>'
+                    : licencias.map(l => {
+                        const vencimiento = new Date(l.vencimiento)
+                        const vencida = vencimiento < ahora
+                        const estado = !l.activa ? 'inactiva' : vencida ? 'vencida' : 'activa'
+                        const estadoTexto = !l.activa ? 'Inactiva' : vencida ? 'Vencida' : 'Activa'
+                        return `<tr>
+                            <td><span class="codigo">${l.codigo}</span></td>
+                            <td>${l.negocio}</td>
+                            <td>${l.tipo}</td>
+                            <td>${l.numeroWhatsapp ? '+' + l.numeroWhatsapp : '<span style="color:#888">No activada</span>'}</td>
+                            <td>${l.activadaEn || '<span style="color:#888">—</span>'}</td>
+                            <td>${l.vencimiento}</td>
+                            <td><span class="badge ${estado}">${estadoTexto}</span></td>
+                            <td class="acciones">
+                                ${estado === 'activa' ? `<button class="btn btn-rojo" onclick="desactivarLicencia('${l.codigo}')">Desactivar</button>` : '-'}
+                            </td>
+                        </tr>`
+                    }).join('')
+            } catch (e) {
+                document.getElementById('tabla-licencias').innerHTML = '<tr><td colspan="8" style="text-align:center;color:#888">Error cargando licencias</td></tr>'
+            }
+        }
+
+        function mostrarAlerta(id, ok, mensaje) {
+            const alerta = document.getElementById(id)
+            alerta.style.display = 'block'
+            alerta.className = 'alerta ' + (ok ? 'ok' : 'error')
+            alerta.textContent = mensaje
+            setTimeout(() => alerta.style.display = 'none', 4000)
+        }
+
+        cargarLicencias()
+    </script>
+</body>
+</html>

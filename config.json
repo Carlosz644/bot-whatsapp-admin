@@ -1,0 +1,73 @@
+{
+  "nombreNegocio": "Mi Negocio",
+  "mensajeBienvenida": "Bienvenido, estamos para servirte.",
+  "horarios": "Lunes a Viernes: 9am - 7pm\nSabados: 9am - 3pm",
+  "horarioApertura": 9,
+  "horarioCierre": 23,
+  "direccion": "Av. Principal #123, Col. Centro",
+  "linkMaps": "https://maps.google.com",
+  "telefonoAsesor": "449-123-4567",
+  "ubicacion": {
+    "lat": 21.8818,
+    "lng": -102.2916
+  },
+  "catalogo": [
+    {
+      "id": 1,
+      "nombre": "Producto A",
+      "precio": 5,
+      "disponible": true
+    },
+    {
+      "id": 2,
+      "nombre": "Producto B",
+      "precio": 2,
+      "disponible": true
+    }
+  ],
+  "menuPersonalizado": [
+    {
+      "id": 1,
+      "opcion": "1",
+      "nombre": "Ver catalogo",
+      "tipo": "catalogo",
+      "respuesta": ""
+    },
+    {
+      "id": 2,
+      "opcion": "2",
+      "nombre": "Horarios",
+      "tipo": "horarios",
+      "respuesta": ""
+    },
+    {
+      "id": 3,
+      "opcion": "3",
+      "nombre": "Ubicacion",
+      "tipo": "ubicacion",
+      "respuesta": ""
+    },
+    {
+      "id": 4,
+      "opcion": "4",
+      "nombre": "Agendar cita",
+      "tipo": "cita",
+      "respuesta": ""
+    },
+    {
+      "id": 5,
+      "opcion": "5",
+      "nombre": "Cancelar cita",
+      "tipo": "cancelar_cita",
+      "respuesta": ""
+    },
+    {
+      "id": 6,
+      "opcion": "6",
+      "nombre": "Hablar con asesor",
+      "tipo": "asesor",
+      "respuesta": ""
+    }
+  ],
+  "tiempoReset": 1
+}

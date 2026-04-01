@@ -1,0 +1,19 @@
+{
+  "name": "mi-bot",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "bot": "node src/app.js",
+    "panel": "node panel/server.js",
+    "start": "node src/app.js & node panel/server.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.8.0",
+    "express": "^4.18.2",
+    "firebase-admin": "^13.7.0",
+    "pino": "^10.3.1",
+    "qrcode": "^1.5.4",
+    "qrcode-terminal": "^0.12.0",
+    "whatsapp-web.js": "^1.23.0"
+  }
+}

@@ -1,0 +1,10 @@
+TypeError: makeWASocketOther is not a function
+    at BaileysProvider.initVendor (C:\Users\cr0_a\Documents\mi-bot\node_modules\@builderbot\provider-baileys\dist\index.cjs:31035:30)
+[2026-03-19T22:54:08.247Z] Unhandled Rejection at: Promise {
+  <rejected> Error: Vendor should not return empty
+      at BaileysProvider.listenOnEvents (C:\Users\cr0_a\Documents\mi-bot\node_modules\@builderbot\bot\dist\index.cjs:34958:19)
+      at C:\Users\cr0_a\Documents\mi-bot\node_modules\@builderbot\bot\dist\index.cjs:34935:35
+} reason: Error: Vendor should not return empty
+    at BaileysProvider.listenOnEvents (C:\Users\cr0_a\Documents\mi-bot\node_modules\@builderbot\bot\dist\index.cjs:34958:19)
+    at C:\Users\cr0_a\Documents\mi-bot\node_modules\@builderbot\bot\dist\index.cjs:34935:35
+[2026-03-19T22:54:51.997Z] Iniciando limpieza de recursos...
