@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "build": "npm install",
     "bot": "node src/app.js",
     "panel": "node panel/server.js",
-    "start": "node src/app.js & node panel/server.js"
+    "start": "node panel/server.js"
   },
   "dependencies": {
     "better-sqlite3": "^12.8.0",
