@@ -1,8 +1,8 @@
 import admin from 'firebase-admin'
-import { createRequire } from 'module'
 
-const require = createRequire(import.meta.url)
-const serviceAccount = require('../firebase-key.json')
+const serviceAccount = process.env.FIREBASE_KEY 
+    ? JSON.parse(process.env.FIREBASE_KEY)
+    : JSON.parse((await import('fs')).readFileSync('./firebase-key.json', 'utf-8'))
 
 if (!admin.apps.length) {
     admin.initializeApp({
