@@ -17,9 +17,16 @@ const DIAS_POR_TIPO = {
     anual: 365
 }
 
+const PORT = process.env.PORT || 3001
+
 app.use(express.json())
 app.use(express.static(__dirname))
 app.use('/admin', express.static('./admin'))
+
+// Redirigir raiz al admin
+app.get('/', (req, res) => {
+    res.redirect('/admin')
+})
 
 // Config
 app.get('/api/config', (req, res) => {
@@ -101,19 +108,13 @@ app.post('/api/licencia/activar', async (req, res) => {
     try {
         const { codigo } = req.body
         if (!codigo) return res.status(400).json({ ok: false, mensaje: 'Codigo requerido' })
-
-        // Obtener numero de WhatsApp actual del bot
         const estado = leerEstado()
         const numeroWhatsapp = estado.numero || null
-
         if (!numeroWhatsapp) {
             return res.json({ ok: false, mensaje: 'Primero vincula tu numero de WhatsApp en la pestana WhatsApp, luego activa la licencia.' })
         }
-
-        // Activar licencia vinculando el numero
         const resultado = await activarLicencia(codigo, numeroWhatsapp)
         if (!resultado.valida) return res.json({ ok: false, mensaje: resultado.motivo })
-
         writeFileSync('./src/licencia.json', JSON.stringify({ codigo }), 'utf-8')
         writeFileSync('./bot_comando.json', JSON.stringify({ accion: 'reiniciar', pendiente: true }), 'utf-8')
         res.json({ ok: true, mensaje: 'Licencia activada y vinculada al numero +' + numeroWhatsapp + '!' })
@@ -154,6 +155,6 @@ app.post('/api/admin/licencias/desactivar/:codigo', async (req, res) => {
     }
 })
 
-app.listen(3001, () => {
-    console.log('Panel web disponible en http://localhost:3001')
+app.listen(PORT, () => {
+    console.log('Panel web disponible en puerto ' + PORT)
 })
