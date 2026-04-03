@@ -2,7 +2,7 @@ import pkg from 'whatsapp-web.js'
 import qrcode from 'qrcode-terminal'
 import QRCode from 'qrcode'
 import { readFileSync, existsSync, writeFileSync } from 'fs'
-import { horarioDisponible, agendarCita, cancelarCita, guardarPedido, guardarContacto, todosLosContactos } from './database.js'
+import { horarioDisponibleConIntervalo, agendarCita, cancelarCita, guardarPedido, guardarContacto, todosLosContactos } from './database.js'
 import { guardarEstado } from './estado.js'
 import { verificarLicencia } from './licencias.js'
 
@@ -73,6 +73,18 @@ function construirMenu(config) {
     let texto = 'Hola! Bienvenido a ' + config.nombreNegocio + '\n\n' + config.mensajeBienvenida + '\n\nEn que te podemos ayudar?\n\n'
     menu.forEach(item => { texto += item.opcion + '. ' + item.nombre + '\n' })
     return texto
+}
+
+function esDiaValido(texto) {
+    const diasValidos = ['lunes', 'martes', 'miercoles', 'miércoles', 'jueves', 'viernes', 'sabado', 'sábado', 'domingo']
+    const textoMin = texto.toLowerCase()
+    const tieneDia = diasValidos.some(d => textoMin.includes(d))
+    const tieneFecha = /\d{1,2}[\/\-]\d{1,2}/.test(texto)
+    return tieneDia || tieneFecha
+}
+
+function esHoraValida(texto) {
+    return /\d{1,2}(:\d{2})?\s*(am|pm)?/i.test(texto)
 }
 
 async function procesarOpcion(item, msg, sesion, config, numero) {
@@ -155,7 +167,6 @@ function iniciarEventos(c) {
         const numero = info?.wid?.user || 'Desconocido'
         guardarEstado({ conectado: true, qr: null, numero })
 
-        // Verificar licencia cada 6 horas
         setInterval(async () => {
             const licenciaData = getLicencia()
             if (!licenciaData.codigo) return
@@ -209,6 +220,10 @@ function iniciarEventos(c) {
         console.log('Mensaje de ' + numero + ': ' + texto)
 
         guardarContacto(numero, null)
+
+        const licActual = getLicencia()
+        if (!licActual.codigo) return
+
         const sesion = getSesion(numero)
         await esperar(tiempoAleatorio())
 
@@ -227,7 +242,12 @@ function iniciarEventos(c) {
             return
         }
 
+        // FLUJO CITAS
         if (sesion.paso === 'cita_nombre') {
+            if (texto.length < 3 || /^\d+$/.test(texto)) {
+                await msg.reply('Por favor escribe tu nombre completo.\nEj: Juan Lopez')
+                return
+            }
             sesion.nombre = texto
             sesion.paso = 'cita_servicio'
             await msg.reply('Gracias ' + texto + '! Que servicio necesitas?\n\nO escribe *cancelar* para salir.')
@@ -235,6 +255,10 @@ function iniciarEventos(c) {
         }
 
         if (sesion.paso === 'cita_servicio') {
+            if (texto.length < 3) {
+                await msg.reply('Por favor describe el servicio que necesitas.\nEj: Corte de cabello, Consulta general')
+                return
+            }
             sesion.servicio = texto
             sesion.paso = 'cita_dia'
             await msg.reply('Que dia prefieres?\nEj: Lunes, Martes o una fecha: 25/03/2026')
@@ -242,16 +266,25 @@ function iniciarEventos(c) {
         }
 
         if (sesion.paso === 'cita_dia') {
+            if (!esDiaValido(texto)) {
+                await msg.reply('Por favor escribe un dia valido.\nEj: Lunes, Martes, Miercoles\nO una fecha: 25/03/2026')
+                return
+            }
             sesion.dia = texto
             sesion.paso = 'cita_hora'
-            await msg.reply('A que hora?\nEj: 10:00am, 2:00pm')
+            await msg.reply('A que hora?\nEj: 10:00am, 2:00pm, 14:00')
             return
         }
 
         if (sesion.paso === 'cita_hora') {
-            const disponible = horarioDisponible(sesion.dia, texto)
+            if (!esHoraValida(texto)) {
+                await msg.reply('Por favor escribe una hora valida.\nEj: 10:00am, 2:00pm, 14:00')
+                return
+            }
+            const intervalo = config.intervaloCitas || 60
+            const disponible = horarioDisponibleConIntervalo(sesion.dia, texto, intervalo)
             if (!disponible) {
-                await msg.reply('Lo sentimos, el horario *' + sesion.dia + ' a las ' + texto + '* ya esta ocupado.\n\nPor favor elige otro horario:')
+                await msg.reply('Lo sentimos, el horario *' + sesion.dia + ' a las ' + texto + '* no esta disponible.\n\nRecuerda que el intervalo entre citas es de ' + intervalo + ' minutos.\n\nPor favor elige otro horario:')
                 return
             }
             const id = agendarCita(numero, sesion.nombre, sesion.dia, texto, sesion.servicio)
@@ -261,10 +294,11 @@ function iniciarEventos(c) {
             return
         }
 
+        // FLUJO CANCELAR CITA
         if (sesion.paso === 'cancelar_cita') {
             const id = parseInt(texto)
-            if (isNaN(id)) {
-                await msg.reply('Por favor escribe solo el numero de folio. Ej: 12')
+            if (isNaN(id) || id <= 0) {
+                await msg.reply('Por favor escribe solo el numero de folio.\nEj: 12')
                 return
             }
             cancelarCita(id)
@@ -274,6 +308,7 @@ function iniciarEventos(c) {
             return
         }
 
+        // FLUJO PEDIDOS
         if (sesion.paso === 'pedido_producto') {
             const encontrado = config.catalogo.find(p => p.nombre.toLowerCase().includes(textoMin))
             if (encontrado) {
@@ -292,6 +327,10 @@ function iniciarEventos(c) {
         }
 
         if (sesion.paso === 'pedido_confirmar') {
+            if (textoMin !== 'si' && textoMin !== 'no') {
+                await msg.reply('Por favor escribe *si* para confirmar o *no* para cancelar.')
+                return
+            }
             if (textoMin === 'si') {
                 const id = guardarPedido(numero, null, sesion.productoElegido.nombre, sesion.productoElegido.precio)
                 sesion.paso = null
@@ -359,12 +398,11 @@ function iniciarEventos(c) {
     })
 }
 
-// Arrancar bot verificando licencia
 async function arrancarBot() {
     const licenciaData = getLicencia()
 
     if (!licenciaData.codigo) {
-        console.log('Sin licencia configurada.')
+        console.log('Sin licencia. Bot arranca pero no responde mensajes.')
         guardarEstado({ conectado: false, qr: null, numero: null, licencia: { valida: false, motivo: 'Sin licencia' } })
     } else {
         console.log('Verificando licencia...')
@@ -372,10 +410,10 @@ async function arrancarBot() {
         if (!resultado.valida) {
             console.log('Licencia invalida:', resultado.motivo)
             guardarEstado({ conectado: false, qr: null, numero: null, licencia: resultado })
-        } else {
-            console.log('Licencia valida hasta:', resultado.vencimiento)
-            guardarEstado({ conectado: false, qr: null, numero: null, licencia: resultado })
+            return
         }
+        console.log('Licencia valida hasta:', resultado.vencimiento)
+        guardarEstado({ conectado: false, qr: null, numero: null, licencia: resultado })
     }
 
     client = crearCliente()
@@ -385,7 +423,6 @@ async function arrancarBot() {
 
 arrancarBot()
 
-// Escuchar comandos del panel via archivo
 setInterval(async () => {
     try {
         if (!existsSync('./bot_comando.json')) return

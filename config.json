@@ -7,6 +7,7 @@
   "direccion": "Av. Principal #123, Col. Centro",
   "linkMaps": "https://maps.google.com",
   "telefonoAsesor": "449-123-4567",
+  "intervaloCitas": 60,
   "ubicacion": {
     "lat": 21.8818,
     "lng": -102.2916
