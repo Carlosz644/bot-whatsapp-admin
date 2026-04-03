@@ -47,7 +47,6 @@
         .acciones { display: flex; gap: 5px; flex-wrap: wrap; }
         .btn-entregado { background: #25D366; color: white; border: none; border-radius: 5px; padding: 5px 10px; cursor: pointer; font-size: 12px; }
         .btn-cancelar { background: #ff4444; color: white; border: none; border-radius: 5px; padding: 5px 10px; cursor: pointer; font-size: 12px; }
-        .btn-bloquear { background: #ff8c00; color: white; border: none; border-radius: 5px; padding: 5px 10px; cursor: pointer; font-size: 12px; }
         .btn-refrescar { background: #f0f2f5; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 13px; float: right; }
         .resumen { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
         .resumen-card { background: white; border-radius: 10px; padding: 20px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
@@ -67,10 +66,8 @@
         .contacto-row input[type="checkbox"] { width: auto; margin: 0; }
         .botones-masivo { display: flex; gap: 10px; margin-bottom: 15px; }
         .btn-secundario { background: #f0f2f5; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 13px; }
-        .bloqueo-form { background: #fff8e1; border: 1px solid #ffcc02; border-radius: 8px; padding: 15px; margin-bottom: 15px; }
-        .bloqueo-form h3 { color: #856404; margin-bottom: 10px; font-size: 15px; }
         .bloqueo-row { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; align-items: end; }
-        .bloqueo-row input, .bloqueo-row select { margin-bottom: 0; }
+        .bloqueo-row input { margin-bottom: 0; }
         .bloqueo-row button { padding: 10px 15px; white-space: nowrap; }
     </style>
 </head>
@@ -93,32 +90,17 @@
     <div class="seccion activa" id="tab-inicio">
         <div class="container">
             <div class="resumen">
-                <div class="resumen-card">
-                    <div class="numero" id="total-citas">0</div>
-                    <div class="etiqueta">Citas hoy</div>
-                </div>
-                <div class="resumen-card">
-                    <div class="numero" id="total-pedidos">0</div>
-                    <div class="etiqueta">Pedidos pendientes</div>
-                </div>
-                <div class="resumen-card">
-                    <div class="numero" id="total-ingresos">$0</div>
-                    <div class="etiqueta">Ingresos del dia</div>
-                </div>
+                <div class="resumen-card"><div class="numero" id="total-citas">0</div><div class="etiqueta">Citas hoy</div></div>
+                <div class="resumen-card"><div class="numero" id="total-pedidos">0</div><div class="etiqueta">Pedidos pendientes</div></div>
+                <div class="resumen-card"><div class="numero" id="total-ingresos">$0</div><div class="etiqueta">Ingresos del dia</div></div>
             </div>
             <div class="card">
                 <h2>Citas de hoy</h2>
-                <table>
-                    <thead><tr><th>Folio</th><th>Nombre</th><th>Servicio</th><th>Hora</th><th>Estado</th></tr></thead>
-                    <tbody id="citas-hoy"></tbody>
-                </table>
+                <table><thead><tr><th>Folio</th><th>Nombre</th><th>Servicio</th><th>Hora</th><th>Estado</th></tr></thead><tbody id="citas-hoy"></tbody></table>
             </div>
             <div class="card">
                 <h2>Pedidos pendientes</h2>
-                <table>
-                    <thead><tr><th>Folio</th><th>Producto</th><th>Precio</th><th>Fecha</th><th>Acciones</th></tr></thead>
-                    <tbody id="pedidos-pendientes"></tbody>
-                </table>
+                <table><thead><tr><th>Folio</th><th>Producto</th><th>Precio</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody id="pedidos-pendientes"></tbody></table>
             </div>
         </div>
     </div>
@@ -130,30 +112,16 @@
                 <h2>Bloquear horario manualmente</h2>
                 <p class="hint">Bloquea una hora para que el bot no permita citas en ese horario. Util cuando alguien agenda por telefono o en persona.</p>
                 <div class="bloqueo-row">
-                    <div>
-                        <label>Dia</label>
-                        <input type="text" id="bloqueo-dia" placeholder="Ej: Lunes, 25/03/2026">
-                    </div>
-                    <div>
-                        <label>Hora</label>
-                        <input type="text" id="bloqueo-hora" placeholder="Ej: 10:00am">
-                    </div>
-                    <div>
-                        <label>Motivo (opcional)</label>
-                        <input type="text" id="bloqueo-motivo" placeholder="Ej: Cita telefonica">
-                    </div>
-                    <div>
-                        <button class="btn-naranja" onclick="bloquearHorario()">Bloquear</button>
-                    </div>
+                    <div><label>Dia</label><input type="text" id="bloqueo-dia" placeholder="Ej: Lunes, 25/03/2026"></div>
+                    <div><label>Hora</label><input type="text" id="bloqueo-hora" placeholder="Ej: 10:00am"></div>
+                    <div><label>Motivo (opcional)</label><input type="text" id="bloqueo-motivo" placeholder="Ej: Cita telefonica"></div>
+                    <div><button class="btn-naranja" onclick="bloquearHorario()">Bloquear</button></div>
                 </div>
                 <div class="alerta" id="alerta-bloqueo"></div>
             </div>
             <div class="card">
                 <h2>Todas las citas <button class="btn-refrescar" onclick="cargarCitas()">Refrescar</button></h2>
-                <table>
-                    <thead><tr><th>Folio</th><th>Nombre</th><th>Servicio</th><th>Dia</th><th>Hora</th><th>Estado</th><th>Accion</th></tr></thead>
-                    <tbody id="tabla-citas"></tbody>
-                </table>
+                <table><thead><tr><th>Folio</th><th>Nombre</th><th>Servicio</th><th>Dia</th><th>Hora</th><th>Estado</th><th>Accion</th></tr></thead><tbody id="tabla-citas"></tbody></table>
             </div>
         </div>
     </div>
@@ -163,10 +131,7 @@
         <div class="container">
             <div class="card">
                 <h2>Todos los pedidos <button class="btn-refrescar" onclick="cargarPedidos()">Refrescar</button></h2>
-                <table>
-                    <thead><tr><th>Folio</th><th>Producto</th><th>Precio</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead>
-                    <tbody id="tabla-pedidos"></tbody>
-                </table>
+                <table><thead><tr><th>Folio</th><th>Producto</th><th>Precio</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody id="tabla-pedidos"></tbody></table>
             </div>
         </div>
     </div>
@@ -175,17 +140,17 @@
     <div class="seccion" id="tab-contactos">
         <div class="container">
             <div class="card">
+                <h2>Envio masivo de mensajes</h2>
                 <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:12px;margin-bottom:15px;font-size:13px;color:#856404">
-    <strong>⚠️ Advertencia — Uso bajo tu propio riesgo</strong><br><br>
-    El envio masivo de mensajes puede resultar en el <strong>bloqueo permanente e irreversible de tu numero</strong> de WhatsApp. Una vez baneado no hay forma de recuperarlo.<br><br>
-    Ten en cuenta lo siguiente:<br>
-    • <strong>Entre mas nuevo sea tu numero, mayor es el riesgo</strong> de ser baneado incluso con pocos mensajes<br>
-    • Solo envia a personas que ya te escribieron primero — son quienes te dieron permiso implicitamente<br>
-    • Si varios destinatarios te reportan como spam, WhatsApp bloquea tu numero sin previo aviso<br>
-    • Evita mensajes con links, promociones agresivas o texto repetitivo<br>
-    • No abuses de esta funcion — usala con moderacion y criterio<br><br>
-    <strong>El uso de esta funcion es tu responsabilidad.</strong>
-</div>
+                    <strong>Advertencia — Uso bajo tu propio riesgo</strong><br><br>
+                    El envio masivo puede resultar en el <strong>bloqueo permanente e irreversible de tu numero</strong> de WhatsApp.<br><br>
+                    • <strong>Entre mas nuevo sea tu numero, mayor es el riesgo</strong> de ser baneado incluso con pocos mensajes<br>
+                    • Solo envia a personas que ya te escribieron primero<br>
+                    • Si varios destinatarios te reportan como spam, WhatsApp bloquea tu numero sin previo aviso<br>
+                    • No abuses de esta funcion: usala con moderacion y criterio<br><br>
+                    <strong>El uso de esta funcion es tu responsabilidad.</strong>
+                </div>
+                <label>Escribe el mensaje</label>
                 <textarea id="mensaje-masivo" placeholder="Ej: Hola! Hoy tenemos 20% de descuento. Visitanos!" style="height:120px"></textarea>
                 <div class="botones-masivo">
                     <button class="btn-secundario" onclick="seleccionarTodos()">Seleccionar todos</button>
@@ -252,7 +217,7 @@
                 <input type="number" id="horarioCierre" min="0" max="23" placeholder="Ej: 19">
             </div>
             <div class="card">
-                <h2>Configuracion de citas</h2>
+                <h2>Configuracion de citas y mensajes</h2>
                 <label>Intervalo entre citas (minutos)</label>
                 <p class="hint">Define cada cuanto tiempo se pueden agendar citas. Ej: medico = 60 min, estetica = 45 min, barberia = 30 min.</p>
                 <select id="intervaloCitas">
@@ -265,8 +230,17 @@
                     <option value="120">2 horas</option>
                 </select>
                 <label>Tiempo de reset de conversacion (minutos)</label>
-                <p class="hint">Tiempo que espera el bot antes de volver a responder el mismo mensaje.</p>
+                <p class="hint">Tiempo que espera el bot antes de volver a mostrar el menu al mismo cliente. Evita que el bot responda en bucle si alguien escribe repetidamente.</p>
                 <input type="number" id="tiempoReset" min="1" max="60" placeholder="Ej: 7">
+                <label>Intervalo entre mensajes masivos (segundos)</label>
+                <p class="hint">Tiempo que espera el bot entre cada mensaje del envio masivo. Mas tiempo = menor riesgo de bloqueo en WhatsApp. Recomendado: minimo 3 segundos.</p>
+                <select id="intervaloMasivo">
+                    <option value="2">2 segundos (riesgo alto)</option>
+                    <option value="3" selected>3 segundos (recomendado)</option>
+                    <option value="5">5 segundos (seguro)</option>
+                    <option value="10">10 segundos (muy seguro)</option>
+                    <option value="15">15 segundos (maxima seguridad)</option>
+                </select>
             </div>
             <div class="card">
                 <h2>Ubicacion</h2>
@@ -318,25 +292,11 @@
             const estado = await fetch('/api/bot/estado').then(r => r.json())
             const div = document.getElementById('estado-licencia')
             if (estado.licencia && estado.licencia.valida) {
-                div.innerHTML = `
-                    <div style="background:#d4edda;padding:15px;border-radius:8px;color:#155724">
-                        <strong>Licencia activa</strong><br>
-                        Negocio: ${estado.licencia.negocio}<br>
-                        Plan: ${estado.licencia.tipo}<br>
-                        Vence: ${estado.licencia.vencimiento}
-                    </div>`
+                div.innerHTML = `<div style="background:#d4edda;padding:15px;border-radius:8px;color:#155724"><strong>Licencia activa</strong><br>Negocio: ${estado.licencia.negocio}<br>Plan: ${estado.licencia.tipo}<br>Vence: ${estado.licencia.vencimiento}</div>`
             } else if (estado.licencia && !estado.licencia.valida) {
-                div.innerHTML = `
-                    <div style="background:#f8d7da;padding:15px;border-radius:8px;color:#721c24">
-                        <strong>Licencia inactiva</strong><br>
-                        ${estado.licencia.motivo || 'Ingresa tu codigo de licencia'}
-                    </div>`
+                div.innerHTML = `<div style="background:#f8d7da;padding:15px;border-radius:8px;color:#721c24"><strong>Licencia inactiva</strong><br>${estado.licencia.motivo || 'Ingresa tu codigo de licencia'}</div>`
             } else {
-                div.innerHTML = `
-                    <div style="background:#fff3cd;padding:15px;border-radius:8px;color:#856404">
-                        <strong>Sin licencia</strong><br>
-                        Ingresa el codigo que te proporcionaron para activar el bot.
-                    </div>`
+                div.innerHTML = `<div style="background:#fff3cd;padding:15px;border-radius:8px;color:#856404"><strong>Sin licencia</strong><br>Ingresa el codigo que te proporcionaron para activar el bot.</div>`
             }
         }
 
@@ -365,29 +325,13 @@
                 const mensajeLicencia = licencia && licencia.valida
                     ? 'Licencia activa hasta: ' + licencia.vencimiento
                     : 'Numero vinculado! Ahora ve a la pestana Licencia e ingresa tu codigo.'
-                panel.innerHTML = `
-                    <div class="estado-bot conectado">
-                        <div class="punto verde"></div>
-                        <div>
-                            <strong>Numero vinculado correctamente!</strong><br>
-                            <span style="font-size:13px;color:#555">Numero: +${estado.numero}</span><br>
-                            <span style="font-size:13px;color:#128C7E;font-weight:bold">${mensajeLicencia}</span>
-                        </div>
-                    </div>`
+                panel.innerHTML = `<div class="estado-bot conectado"><div class="punto verde"></div><div><strong>Numero vinculado correctamente!</strong><br><span style="font-size:13px;color:#555">Numero: +${estado.numero}</span><br><span style="font-size:13px;color:#128C7E;font-weight:bold">${mensajeLicencia}</span></div></div>`
                 qrPanel.innerHTML = ''
             } else if (estado.qr) {
-                panel.innerHTML = `
-                    <div class="estado-bot qr">
-                        <div class="punto azul"></div>
-                        <strong>Escanea el QR con WhatsApp para vincular el numero</strong>
-                    </div>`
+                panel.innerHTML = `<div class="estado-bot qr"><div class="punto azul"></div><strong>Escanea el QR con WhatsApp para vincular el numero</strong></div>`
                 qrPanel.innerHTML = `<img class="qr-img" src="${estado.qr}" alt="QR WhatsApp">`
             } else {
-                panel.innerHTML = `
-                    <div class="estado-bot desconectado">
-                        <div class="punto amarillo"></div>
-                        <strong>Bot desconectado o iniciando...</strong>
-                    </div>`
+                panel.innerHTML = `<div class="estado-bot desconectado"><div class="punto amarillo"></div><strong>Bot desconectado o iniciando...</strong></div>`
                 qrPanel.innerHTML = ''
             }
         }
@@ -435,25 +379,15 @@
             const citasHoy = citas.filter(c => c.dia.toLowerCase().includes(hoy) && c.estado === 'confirmada')
             const pedidosPendientes = pedidos.filter(p => p.estado === 'recibido')
             const ingresos = pedidos.filter(p => p.estado === 'entregado').reduce((sum, p) => sum + p.precio, 0)
-
             document.getElementById('total-citas').textContent = citasHoy.length
             document.getElementById('total-pedidos').textContent = pedidosPendientes.length
             document.getElementById('total-ingresos').textContent = '$' + ingresos
-
             document.getElementById('citas-hoy').innerHTML = citasHoy.length === 0
                 ? '<tr><td colspan="5" style="text-align:center;color:#888">No hay citas para hoy</td></tr>'
                 : citasHoy.map(c => `<tr><td>#${c.id}</td><td>${c.nombre}</td><td>${c.servicio}</td><td>${c.hora}</td><td><span class="badge ${c.estado}">${c.estado}</span></td></tr>`).join('')
-
             document.getElementById('pedidos-pendientes').innerHTML = pedidosPendientes.length === 0
                 ? '<tr><td colspan="5" style="text-align:center;color:#888">No hay pedidos pendientes</td></tr>'
-                : pedidosPendientes.map(p => `
-                    <tr>
-                        <td>#${p.id}</td><td>${p.producto}</td><td>$${p.precio}</td><td>${p.creado_en}</td>
-                        <td class="acciones">
-                            <button class="btn-entregado" onclick="cambiarEstadoPedido(${p.id}, 'entregado')">Entregado</button>
-                            <button class="btn-cancelar" onclick="cambiarEstadoPedido(${p.id}, 'cancelado')">Cancelar</button>
-                        </td>
-                    </tr>`).join('')
+                : pedidosPendientes.map(p => `<tr><td>#${p.id}</td><td>${p.producto}</td><td>$${p.precio}</td><td>${p.creado_en}</td><td class="acciones"><button class="btn-entregado" onclick="cambiarEstadoPedido(${p.id}, 'entregado')">Entregado</button><button class="btn-cancelar" onclick="cambiarEstadoPedido(${p.id}, 'cancelado')">Cancelar</button></td></tr>`).join('')
         }
 
         async function cargarCitas() {
@@ -464,16 +398,8 @@
                     const esBloqueada = c.bloqueada === 1
                     const estadoBadge = esBloqueada ? 'bloqueada' : c.estado
                     const estadoTexto = esBloqueada ? 'Bloqueada' : c.estado
-                    const nombreMostrar = esBloqueada ? '🔒 ' + c.nombre : c.nombre
-                    return `<tr>
-                        <td>#${c.id}</td>
-                        <td>${nombreMostrar}</td>
-                        <td>${c.servicio}</td>
-                        <td>${c.dia}</td>
-                        <td>${c.hora}</td>
-                        <td><span class="badge ${estadoBadge}">${estadoTexto}</span></td>
-                        <td>${c.estado === 'confirmada' ? `<button class="btn-cancelar" onclick="cancelarCita(${c.id})">${esBloqueada ? 'Desbloquear' : 'Cancelar'}</button>` : '-'}</td>
-                    </tr>`
+                    const nombreMostrar = esBloqueada ? 'Bloqueado: ' + c.nombre : c.nombre
+                    return `<tr><td>#${c.id}</td><td>${nombreMostrar}</td><td>${c.servicio}</td><td>${c.dia}</td><td>${c.hora}</td><td><span class="badge ${estadoBadge}">${estadoTexto}</span></td><td>${c.estado === 'confirmada' ? `<button class="btn-cancelar" onclick="cancelarCita(${c.id})">${esBloqueada ? 'Desbloquear' : 'Cancelar'}</button>` : '-'}</td></tr>`
                 }).join('')
         }
 
@@ -481,18 +407,7 @@
             const pedidos = await fetch('/api/pedidos').then(r => r.json())
             document.getElementById('tabla-pedidos').innerHTML = pedidos.length === 0
                 ? '<tr><td colspan="6" style="text-align:center;color:#888">No hay pedidos registrados</td></tr>'
-                : pedidos.map(p => `
-                    <tr>
-                        <td>#${p.id}</td><td>${p.producto}</td><td>$${p.precio}</td>
-                        <td><span class="badge ${p.estado}">${p.estado}</span></td>
-                        <td>${p.creado_en}</td>
-                        <td class="acciones">
-                            ${p.estado === 'recibido' ? `
-                                <button class="btn-entregado" onclick="cambiarEstadoPedido(${p.id}, 'entregado')">Entregado</button>
-                                <button class="btn-cancelar" onclick="cambiarEstadoPedido(${p.id}, 'cancelado')">Cancelar</button>
-                            ` : '-'}
-                        </td>
-                    </tr>`).join('')
+                : pedidos.map(p => `<tr><td>#${p.id}</td><td>${p.producto}</td><td>$${p.precio}</td><td><span class="badge ${p.estado}">${p.estado}</span></td><td>${p.creado_en}</td><td class="acciones">${p.estado === 'recibido' ? `<button class="btn-entregado" onclick="cambiarEstadoPedido(${p.id}, 'entregado')">Entregado</button><button class="btn-cancelar" onclick="cambiarEstadoPedido(${p.id}, 'cancelado')">Cancelar</button>` : '-'}</td></tr>`).join('')
         }
 
         async function cargarContactos() {
@@ -501,14 +416,7 @@
             const lista = document.getElementById('lista-contactos-masivo')
             lista.innerHTML = contactosTodos.length === 0
                 ? '<p style="color:#888;text-align:center">No hay contactos aun.</p>'
-                : contactosTodos.map(c => `
-                    <div class="contacto-row">
-                        <input type="checkbox" id="c-${c.id}" value="${c.numero}" checked>
-                        <label for="c-${c.id}" style="margin:0;font-weight:normal;cursor:pointer">
-                            ${c.numero.replace('@c.us', '')}
-                            <span style="color:#888;font-size:12px">— ${c.ultimo_mensaje}</span>
-                        </label>
-                    </div>`).join('')
+                : contactosTodos.map(c => `<div class="contacto-row"><input type="checkbox" id="c-${c.id}" value="${c.numero}" checked><label for="c-${c.id}" style="margin:0;font-weight:normal;cursor:pointer">${c.numero.replace('@c.us', '')} <span style="color:#888;font-size:12px">— ${c.ultimo_mensaje}</span></label></div>`).join('')
         }
 
         function seleccionarTodos() {
@@ -562,14 +470,13 @@
             document.getElementById('horarioApertura').value = config.horarioApertura || 9
             document.getElementById('horarioCierre').value = config.horarioCierre || 19
             document.getElementById('tiempoReset').value = config.tiempoReset || 7
+            document.getElementById('intervaloCitas').value = config.intervaloCitas || 60
+            document.getElementById('intervaloMasivo').value = config.intervaloMasivo || 3
             document.getElementById('direccion').value = config.direccion || ''
             document.getElementById('linkMaps').value = config.linkMaps || ''
-            document.getElementById('intervaloCitas').value = config.intervaloCitas || 60
-
             const menuContenedor = document.getElementById('menu-items')
             menuContenedor.innerHTML = ''
             if (config.menuPersonalizado) config.menuPersonalizado.forEach((item, i) => agregarOpcionMenu(item, i))
-
             const contenedor = document.getElementById('productos')
             contenedor.innerHTML = ''
             if (config.catalogo) config.catalogo.forEach((p, i) => agregarProducto(p, i))
@@ -655,6 +562,7 @@
                 horarioCierre: parseInt(document.getElementById('horarioCierre').value),
                 tiempoReset: parseInt(document.getElementById('tiempoReset').value) || 7,
                 intervaloCitas: parseInt(document.getElementById('intervaloCitas').value) || 60,
+                intervaloMasivo: parseInt(document.getElementById('intervaloMasivo').value) || 3,
                 direccion: document.getElementById('direccion').value,
                 linkMaps: document.getElementById('linkMaps').value,
                 menuPersonalizado: obtenerMenu(),

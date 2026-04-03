@@ -191,7 +191,8 @@ function iniciarEventos(c) {
                     try {
                         await c.sendMessage(contacto.numero, envio.mensaje)
                         enviados++
-                        await new Promise(r => setTimeout(r, 2000))
+                        const intervaloMasivo = (getConfig().intervaloMasivo || 3) * 1000
+                        await new Promise(r => setTimeout(r, intervaloMasivo))
                     } catch (e) {
                         console.log('Error enviando a ' + contacto.numero + ': ' + e.message)
                     }
@@ -242,7 +243,6 @@ function iniciarEventos(c) {
             return
         }
 
-        // FLUJO CITAS
         if (sesion.paso === 'cita_nombre') {
             if (texto.length < 3 || /^\d+$/.test(texto)) {
                 await msg.reply('Por favor escribe tu nombre completo.\nEj: Juan Lopez')
@@ -294,7 +294,6 @@ function iniciarEventos(c) {
             return
         }
 
-        // FLUJO CANCELAR CITA
         if (sesion.paso === 'cancelar_cita') {
             const id = parseInt(texto)
             if (isNaN(id) || id <= 0) {
@@ -308,7 +307,6 @@ function iniciarEventos(c) {
             return
         }
 
-        // FLUJO PEDIDOS
         if (sesion.paso === 'pedido_producto') {
             const encontrado = config.catalogo.find(p => p.nombre.toLowerCase().includes(textoMin))
             if (encontrado) {
