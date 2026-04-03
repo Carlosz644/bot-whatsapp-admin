@@ -113,7 +113,7 @@
     </div>
 
     <script>
-        const API = 'http://localhost:3001/api/admin'
+        const API = window.location.origin + '/api/admin'
 
         async function generarLicencia() {
             const negocio = document.getElementById('negocio').value.trim()
