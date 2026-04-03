@@ -31,7 +31,9 @@ function esperar(ms) {
 }
 
 function tiempoAleatorio() {
-    return Math.floor(Math.random() * 1000) + 1000
+    const config = getConfig()
+    const base = (config.delayRespuesta || 2) * 1000
+    return Math.floor(Math.random() * 1000) + base
 }
 
 const sesiones = {}

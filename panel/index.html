@@ -241,10 +241,22 @@
                     <option value="120">2 horas</option>
                 </select>
                 <label>Tiempo de reset de conversacion (minutos)</label>
-                <p class="hint">Tiempo que espera el bot antes de volver a mostrar el menu al mismo cliente. Evita que el bot responda en bucle si alguien escribe repetidamente.</p>
+                <p class="hint">Tiempo que espera el bot antes de volver a mostrar el menu al mismo cliente. Evita que el bot responda en bucle.</p>
                 <input type="number" id="tiempoReset" min="1" max="60" placeholder="Ej: 7">
+                <label>Delay de respuesta normal (segundos)</label>
+                <p class="hint">Tiempo minimo que espera el bot antes de responder cada mensaje individual. Simula escritura humana. Minimo 2 segundos recomendado.</p>
+                <select id="delayRespuesta">
+                    <option value="2" selected>2-3 segundos (recomendado)</option>
+                    <option value="3">3-4 segundos</option>
+                    <option value="5">5-6 segundos</option>
+                    <option value="8">8-9 segundos</option>
+                    <option value="10">10-11 segundos</option>
+                    <option value="15">15-16 segundos</option>
+                    <option value="20">20-21 segundos</option>
+                    <option value="30">30-31 segundos</option>
+                </select>
                 <label>Intervalo entre mensajes masivos (segundos)</label>
-                <p class="hint">Tiempo que espera el bot entre cada mensaje del envio masivo. Mas tiempo = menor riesgo de bloqueo en WhatsApp. Recomendado: minimo 3 segundos.</p>
+                <p class="hint">Tiempo que espera el bot entre cada mensaje del envio masivo. Diferente al delay normal — este aplica SOLO al envio masivo.</p>
                 <select id="intervaloMasivo">
                     <option value="2">2 segundos (riesgo alto)</option>
                     <option value="3" selected>3 segundos (recomendado)</option>
@@ -509,6 +521,7 @@
             document.getElementById('tiempoReset').value = config.tiempoReset || 7
             document.getElementById('intervaloCitas').value = config.intervaloCitas || 60
             document.getElementById('intervaloMasivo').value = config.intervaloMasivo || 3
+            document.getElementById('delayRespuesta').value = config.delayRespuesta || 2
             document.getElementById('direccion').value = config.direccion || ''
             document.getElementById('linkMaps').value = config.linkMaps || ''
             const menuContenedor = document.getElementById('menu-items')
@@ -600,6 +613,7 @@
                 tiempoReset: parseInt(document.getElementById('tiempoReset').value) || 7,
                 intervaloCitas: parseInt(document.getElementById('intervaloCitas').value) || 60,
                 intervaloMasivo: parseInt(document.getElementById('intervaloMasivo').value) || 3,
+                delayRespuesta: parseInt(document.getElementById('delayRespuesta').value) || 2,
                 direccion: document.getElementById('direccion').value,
                 linkMaps: document.getElementById('linkMaps').value,
                 menuPersonalizado: obtenerMenu(),

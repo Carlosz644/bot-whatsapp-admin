@@ -9,6 +9,7 @@
   "telefonoAsesor": "449-123-4567",
   "intervaloCitas": 60,
   "intervaloMasivo": 3,
+  "delayRespuesta": 2,
   "tiempoReset": 1,
   "ubicacion": {
     "lat": 21.8818,
