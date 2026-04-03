@@ -48,6 +48,7 @@
         .btn-entregado { background: #25D366; color: white; border: none; border-radius: 5px; padding: 5px 10px; cursor: pointer; font-size: 12px; }
         .btn-cancelar { background: #ff4444; color: white; border: none; border-radius: 5px; padding: 5px 10px; cursor: pointer; font-size: 12px; }
         .btn-refrescar { background: #f0f2f5; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 13px; float: right; }
+        .btn-limpiar { background: #ff4444; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 13px; float: right; margin-left: 8px; font-weight: bold; }
         .resumen { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
         .resumen-card { background: white; border-radius: 10px; padding: 20px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         .resumen-card .numero { font-size: 36px; font-weight: bold; color: #25D366; }
@@ -120,7 +121,11 @@
                 <div class="alerta" id="alerta-bloqueo"></div>
             </div>
             <div class="card">
-                <h2>Todas las citas <button class="btn-refrescar" onclick="cargarCitas()">Refrescar</button></h2>
+                <h2>Todas las citas
+                    <button class="btn-refrescar" onclick="cargarCitas()">Refrescar</button>
+                    <button class="btn-limpiar" onclick="limpiarCitas()">Limpiar todo</button>
+                </h2>
+                <div class="alerta" id="alerta-citas"></div>
                 <table><thead><tr><th>Folio</th><th>Nombre</th><th>Servicio</th><th>Dia</th><th>Hora</th><th>Estado</th><th>Accion</th></tr></thead><tbody id="tabla-citas"></tbody></table>
             </div>
         </div>
@@ -130,7 +135,11 @@
     <div class="seccion" id="tab-pedidos">
         <div class="container">
             <div class="card">
-                <h2>Todos los pedidos <button class="btn-refrescar" onclick="cargarPedidos()">Refrescar</button></h2>
+                <h2>Todos los pedidos
+                    <button class="btn-refrescar" onclick="cargarPedidos()">Refrescar</button>
+                    <button class="btn-limpiar" onclick="limpiarPedidos()">Limpiar todo</button>
+                </h2>
+                <div class="alerta" id="alerta-pedidos"></div>
                 <table><thead><tr><th>Folio</th><th>Producto</th><th>Precio</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody id="tabla-pedidos"></tbody></table>
             </div>
         </div>
@@ -155,8 +164,10 @@
                 <div class="botones-masivo">
                     <button class="btn-secundario" onclick="seleccionarTodos()">Seleccionar todos</button>
                     <button class="btn-secundario" onclick="deseleccionarTodos()">Deseleccionar todos</button>
+                    <button class="btn-rojo" style="padding:8px 15px;font-size:13px" onclick="limpiarContactos()">Limpiar contactos</button>
                 </div>
                 <div id="total-contactos" class="hint"></div>
+                <div class="alerta" id="alerta-contactos"></div>
                 <div id="lista-contactos-masivo"></div>
                 <button class="btn-guardar" style="margin-top:15px" onclick="enviarMasivo()">Enviar a contactos seleccionados</button>
                 <div class="alerta" id="alerta-masivo" style="margin-top:15px"></div>
@@ -368,6 +379,32 @@
                 document.getElementById('bloqueo-motivo').value = ''
                 cargarCitas()
             }
+        }
+
+        async function limpiarCitas() {
+            if (!confirm('Seguro que quieres eliminar TODAS las citas? Esta accion no se puede deshacer.')) return
+            const res = await fetch('/api/citas/limpiar', { method: 'POST' })
+            const data = await res.json()
+            mostrarAlerta('alerta-citas', data.ok, data.mensaje)
+            cargarCitas()
+            cargarInicio()
+        }
+
+        async function limpiarPedidos() {
+            if (!confirm('Seguro que quieres eliminar TODOS los pedidos? Esta accion no se puede deshacer.')) return
+            const res = await fetch('/api/pedidos/limpiar', { method: 'POST' })
+            const data = await res.json()
+            mostrarAlerta('alerta-pedidos', data.ok, data.mensaje)
+            cargarPedidos()
+            cargarInicio()
+        }
+
+        async function limpiarContactos() {
+            if (!confirm('Seguro que quieres eliminar TODOS los contactos? Esta accion no se puede deshacer.')) return
+            const res = await fetch('/api/contactos/limpiar', { method: 'POST' })
+            const data = await res.json()
+            mostrarAlerta('alerta-contactos', data.ok, data.mensaje)
+            cargarContactos()
         }
 
         async function cargarInicio() {

@@ -30,25 +30,17 @@ db.exec(`
     );
 `)
 
-// Agregar columna bloqueada si no existe (para bases de datos antiguas)
-try {
-    db.exec('ALTER TABLE citas ADD COLUMN bloqueada INTEGER DEFAULT 0')
-} catch (e) {}
+try { db.exec('ALTER TABLE citas ADD COLUMN bloqueada INTEGER DEFAULT 0') } catch (e) {}
 
 // ─── CITAS ───
-
 export function horarioDisponible(dia, hora) {
-    const cita = db.prepare(
-        'SELECT id FROM citas WHERE dia = ? AND hora = ? AND estado != ?'
-    ).get(dia, hora, 'cancelada')
+    const cita = db.prepare('SELECT id FROM citas WHERE dia = ? AND hora = ? AND estado != ?').get(dia, hora, 'cancelada')
     return !cita
 }
 
 export function horarioDisponibleConIntervalo(dia, hora, intervaloMinutos) {
-    // Convierte hora string a minutos
     function horaAMinutos(h) {
         h = h.toLowerCase().trim()
-        let minutos = 0
         const ampm = h.includes('pm') ? 'pm' : h.includes('am') ? 'am' : null
         h = h.replace(/am|pm/g, '').trim()
         const partes = h.split(':')
@@ -58,13 +50,8 @@ export function horarioDisponibleConIntervalo(dia, hora, intervaloMinutos) {
         if (ampm === 'am' && horas === 12) horas = 0
         return horas * 60 + mins
     }
-
-    const citasDelDia = db.prepare(
-        'SELECT hora FROM citas WHERE dia = ? AND estado != ?'
-    ).all(dia, 'cancelada')
-
+    const citasDelDia = db.prepare('SELECT hora FROM citas WHERE dia = ? AND estado != ?').all(dia, 'cancelada')
     const nuevaHoraMin = horaAMinutos(hora)
-
     for (const cita of citasDelDia) {
         const citaMin = horaAMinutos(cita.hora)
         const diferencia = Math.abs(nuevaHoraMin - citaMin)
@@ -74,18 +61,12 @@ export function horarioDisponibleConIntervalo(dia, hora, intervaloMinutos) {
 }
 
 export function agendarCita(numero, nombre, dia, hora, servicio) {
-    const stmt = db.prepare(
-        'INSERT INTO citas (numero, nombre, dia, hora, servicio) VALUES (?, ?, ?, ?, ?)'
-    )
-    const result = stmt.run(numero, nombre, dia, hora, servicio || 'General')
+    const result = db.prepare('INSERT INTO citas (numero, nombre, dia, hora, servicio) VALUES (?, ?, ?, ?, ?)').run(numero, nombre, dia, hora, servicio || 'General')
     return result.lastInsertRowid
 }
 
 export function bloquearHorario(dia, hora, motivo) {
-    const stmt = db.prepare(
-        'INSERT INTO citas (numero, nombre, dia, hora, servicio, bloqueada) VALUES (?, ?, ?, ?, ?, 1)'
-    )
-    const result = stmt.run('admin', motivo || 'Bloqueado', dia, hora, motivo || 'Bloqueado')
+    const result = db.prepare('INSERT INTO citas (numero, nombre, dia, hora, servicio, bloqueada) VALUES (?, ?, ?, ?, ?, 1)').run('admin', motivo || 'Bloqueado', dia, hora, motivo || 'Bloqueado')
     return result.lastInsertRowid
 }
 
@@ -94,9 +75,7 @@ export function desbloquearHorario(id) {
 }
 
 export function obtenerCitasPorNumero(numero) {
-    return db.prepare(
-        'SELECT * FROM citas WHERE numero = ? AND estado = ?'
-    ).all(numero, 'confirmada')
+    return db.prepare('SELECT * FROM citas WHERE numero = ? AND estado = ?').all(numero, 'confirmada')
 }
 
 export function cancelarCita(id) {
@@ -107,13 +86,13 @@ export function todasLasCitas() {
     return db.prepare('SELECT * FROM citas ORDER BY creada_en DESC').all()
 }
 
-// ─── PEDIDOS ───
+export function limpiarCitas() {
+    db.prepare('DELETE FROM citas').run()
+}
 
+// ─── PEDIDOS ───
 export function guardarPedido(numero, nombre, producto, precio) {
-    const stmt = db.prepare(
-        'INSERT INTO pedidos (numero, nombre, producto, precio) VALUES (?, ?, ?, ?)'
-    )
-    const result = stmt.run(numero, nombre || '', producto, precio)
+    const result = db.prepare('INSERT INTO pedidos (numero, nombre, producto, precio) VALUES (?, ?, ?, ?)').run(numero, nombre || '', producto, precio)
     return result.lastInsertRowid
 }
 
@@ -129,8 +108,11 @@ export function actualizarEstadoPedido(id, estado) {
     db.prepare('UPDATE pedidos SET estado = ? WHERE id = ?').run(estado, id)
 }
 
-// ─── CONTACTOS ───
+export function limpiarPedidos() {
+    db.prepare('DELETE FROM pedidos').run()
+}
 
+// ─── CONTACTOS ───
 export function guardarContacto(numero, nombre) {
     db.prepare(`
         INSERT INTO contactos (numero, nombre, ultimo_mensaje)
@@ -141,6 +123,10 @@ export function guardarContacto(numero, nombre) {
 
 export function todosLosContactos() {
     return db.prepare('SELECT * FROM contactos ORDER BY ultimo_mensaje DESC').all()
+}
+
+export function limpiarContactos() {
+    db.prepare('DELETE FROM contactos').run()
 }
 
 export default db

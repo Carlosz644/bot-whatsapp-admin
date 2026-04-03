@@ -2,7 +2,7 @@ import express from 'express'
 import { readFileSync, writeFileSync, existsSync } from 'fs'
 import { fileURLToPath } from 'url'
 import { dirname } from 'path'
-import { todasLasCitas, todosPedidos, cancelarCita, actualizarEstadoPedido, todosLosContactos, bloquearHorario } from '../src/database.js'
+import { todasLasCitas, todosPedidos, cancelarCita, actualizarEstadoPedido, todosLosContactos, bloquearHorario, limpiarCitas, limpiarPedidos, limpiarContactos } from '../src/database.js'
 import { leerEstado } from '../src/estado.js'
 import { verificarLicencia, activarLicencia } from '../src/licencias.js'
 
@@ -12,7 +12,6 @@ const app = express()
 app.use(express.json())
 app.use(express.static(__dirname))
 
-// Config
 app.get('/api/config', (req, res) => {
     const config = JSON.parse(readFileSync('./config.json', 'utf-8'))
     res.json(config)
@@ -27,7 +26,6 @@ app.post('/api/config', (req, res) => {
     }
 })
 
-// Bot estado
 app.get('/api/bot/estado', (req, res) => {
     res.json(leerEstado())
 })
@@ -69,6 +67,15 @@ app.post('/api/citas/bloquear', (req, res) => {
     }
 })
 
+app.post('/api/citas/limpiar', (req, res) => {
+    try {
+        limpiarCitas()
+        res.json({ ok: true, mensaje: 'Todas las citas eliminadas' })
+    } catch (e) {
+        res.status(500).json({ ok: false, mensaje: 'Error al limpiar: ' + e.message })
+    }
+})
+
 // Pedidos
 app.get('/api/pedidos', (req, res) => { res.json(todosPedidos()) })
 
@@ -81,8 +88,26 @@ app.post('/api/pedidos/estado/:id', (req, res) => {
     }
 })
 
+app.post('/api/pedidos/limpiar', (req, res) => {
+    try {
+        limpiarPedidos()
+        res.json({ ok: true, mensaje: 'Todos los pedidos eliminados' })
+    } catch (e) {
+        res.status(500).json({ ok: false, mensaje: 'Error al limpiar: ' + e.message })
+    }
+})
+
 // Contactos
 app.get('/api/contactos', (req, res) => { res.json(todosLosContactos()) })
+
+app.post('/api/contactos/limpiar', (req, res) => {
+    try {
+        limpiarContactos()
+        res.json({ ok: true, mensaje: 'Todos los contactos eliminados' })
+    } catch (e) {
+        res.status(500).json({ ok: false, mensaje: 'Error al limpiar: ' + e.message })
+    }
+})
 
 // Envio masivo
 app.post('/api/envio-masivo', (req, res) => {
@@ -105,17 +130,13 @@ app.post('/api/licencia/activar', async (req, res) => {
     try {
         const { codigo } = req.body
         if (!codigo) return res.status(400).json({ ok: false, mensaje: 'Codigo requerido' })
-
         const estado = leerEstado()
         const numeroWhatsapp = estado.numero || null
-
         if (!numeroWhatsapp) {
             return res.json({ ok: false, mensaje: 'Primero vincula tu numero de WhatsApp en la pestana WhatsApp, luego activa la licencia.' })
         }
-
         const resultado = await activarLicencia(codigo, numeroWhatsapp)
         if (!resultado.valida) return res.json({ ok: false, mensaje: resultado.motivo })
-
         writeFileSync('./src/licencia.json', JSON.stringify({ codigo }), 'utf-8')
         writeFileSync('./bot_comando.json', JSON.stringify({ accion: 'reiniciar', pendiente: true }), 'utf-8')
         res.json({ ok: true, mensaje: 'Licencia activada y vinculada al numero +' + numeroWhatsapp + '!' })
