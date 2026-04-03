@@ -1,8 +1,17 @@
 import admin from 'firebase-admin'
 
-const serviceAccount = process.env.FIREBASE_KEY 
-    ? JSON.parse(process.env.FIREBASE_KEY)
-    : JSON.parse((await import('fs')).readFileSync('./firebase-key.json', 'utf-8'))
+let serviceAccount
+
+if (process.env.FIREBASE_KEY) {
+    try {
+        serviceAccount = JSON.parse(process.env.FIREBASE_KEY)
+    } catch (e) {
+        console.log('Error parseando FIREBASE_KEY:', e.message)
+    }
+} else {
+    const { readFileSync } = await import('fs')
+    serviceAccount = JSON.parse(readFileSync('./firebase-key.json', 'utf-8'))
+}
 
 if (!admin.apps.length) {
     admin.initializeApp({
@@ -50,12 +59,10 @@ export async function activarLicencia(codigo, numeroWhatsapp) {
         if (!datos.activa) return { valida: false, motivo: 'Licencia desactivada' }
         if (ahora > vencimiento) return { valida: false, motivo: 'Licencia vencida' }
 
-        // Verificar si ya esta vinculada a otro numero
         if (datos.numeroWhatsapp && datos.numeroWhatsapp !== numeroWhatsapp) {
             return { valida: false, motivo: 'Esta licencia ya esta en uso por otro numero de WhatsApp' }
         }
 
-        // Vincular numero si es la primera vez
         if (!datos.numeroWhatsapp) {
             await db.collection('licencias').doc(codigo).update({
                 numeroWhatsapp,
@@ -97,7 +104,7 @@ export async function desactivarLicencia(codigo) {
     await db.collection('licencias').doc(codigo).update({ activa: false })
 }
 
-// Desvincular numero (para cuando el cliente cambia de numero)
+// Desvincular numero
 export async function desvincularNumero(codigo) {
     await db.collection('licencias').doc(codigo).update({ numeroWhatsapp: null })
 }

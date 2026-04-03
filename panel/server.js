@@ -5,7 +5,7 @@ import { crearLicencia, desactivarLicencia, todasLasLicencias, generarCodigo } f
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const app = express()
-const PORT = process.env.PORT || 8080
+const PORT = process.env.PORT || 3001
 
 app.use(express.json())
 app.use('/admin', express.static('./admin'))
