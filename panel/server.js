@@ -145,6 +145,7 @@ app.post('/api/licencia/activar', async (req, res) => {
     }
 })
 
-app.listen(3001, () => {
-    console.log('Panel web disponible en http://localhost:3001')
+const PORT = process.env.PORT || 3001
+app.listen(PORT, () => {
+    console.log('Panel web disponible en http://localhost:' + PORT)
 })
