@@ -1,151 +1,101 @@
 import express from 'express'
-import { readFileSync, writeFileSync, existsSync } from 'fs'
 import { fileURLToPath } from 'url'
-import { dirname } from 'path'
-import { todasLasCitas, todosPedidos, cancelarCita, actualizarEstadoPedido, todosLosContactos, bloquearHorario, limpiarCitas, limpiarPedidos, limpiarContactos } from '../src/database.js'
-import { leerEstado } from '../src/estado.js'
-import { verificarLicencia, activarLicencia } from '../src/licencias.js'
+import { dirname, join } from 'path'
+import { initializeApp, cert, getApps } from 'firebase-admin/app'
+import { getFirestore } from 'firebase-admin/firestore'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const app = express()
-
 app.use(express.json())
 app.use(express.static(__dirname))
 
-app.get('/api/config', (req, res) => {
-    const config = JSON.parse(readFileSync('./config.json', 'utf-8'))
-    res.json(config)
-})
+// Firebase
+const firebaseKey = JSON.parse(process.env.FIREBASE_KEY)
+if (!getApps().length) {
+    initializeApp({ credential: cert(firebaseKey) })
+}
+const db = getFirestore()
 
-app.post('/api/config', (req, res) => {
+// --- HELPERS ---
+function generarCodigo() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+    const seg = () => Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
+    return `${seg()}-${seg()}-${seg()}`
+}
+
+function diasPorTipo(tipo) {
+    const mapa = { prueba: 7, mensual: 30, trimestral: 90, semestral: 180, anual: 365 }
+    return mapa[tipo] || 30
+}
+
+function fechaVencimiento(dias) {
+    const d = new Date()
+    d.setDate(d.getDate() + dias)
+    return d.toISOString().split('T')[0]
+}
+
+// --- RUTAS ---
+
+// Crear licencia
+app.post('/api/admin/licencias/crear', async (req, res) => {
     try {
-        writeFileSync('./config.json', JSON.stringify(req.body, null, 2), 'utf-8')
-        res.json({ ok: true, mensaje: 'Configuracion guardada correctamente' })
+        const { negocio, tipo } = req.body
+        if (!negocio) return res.status(400).json({ ok: false, mensaje: 'Negocio requerido' })
+
+        const codigo = generarCodigo()
+        const dias = diasPorTipo(tipo || 'mensual')
+
+        await db.collection('licencias').doc(codigo).set({
+            codigo,
+            negocio,
+            tipo: tipo || 'mensual',
+            activa: true,
+            creadaEn: new Date().toISOString().split('T')[0],
+            vencimiento: fechaVencimiento(dias),
+            numeroWhatsapp: null,
+            activadaEn: null
+        })
+
+        res.json({ ok: true, codigo, mensaje: 'Licencia creada correctamente' })
     } catch (e) {
-        res.status(500).json({ ok: false, mensaje: 'Error al guardar' })
+        res.status(500).json({ ok: false, mensaje: 'Error al crear: ' + e.message })
     }
 })
 
-app.get('/api/bot/estado', (req, res) => {
-    res.json(leerEstado())
-})
-
-app.post('/api/bot/reiniciar', (req, res) => {
+// Listar licencias
+app.get('/api/admin/licencias', async (req, res) => {
     try {
-        writeFileSync('./bot_comando.json', JSON.stringify({ accion: 'reiniciar', pendiente: true }), 'utf-8')
-        res.json({ ok: true, mensaje: 'Bot reiniciando...' })
+        const snap = await db.collection('licencias').get()
+        const licencias = []
+        snap.forEach(doc => licencias.push(doc.data()))
+        licencias.sort((a, b) => (b.creadaEn || '').localeCompare(a.creadaEn || ''))
+        res.json(licencias)
     } catch (e) {
-        res.status(500).json({ ok: false, mensaje: 'Error al reiniciar' })
+        res.status(500).json([])
     }
 })
 
-app.post('/api/bot/desvincular', (req, res) => {
+// Desactivar licencia
+app.post('/api/admin/licencias/desactivar/:codigo', async (req, res) => {
     try {
-        writeFileSync('./bot_comando.json', JSON.stringify({ accion: 'desvincular', pendiente: true }), 'utf-8')
-        res.json({ ok: true, mensaje: 'Desvinculando numero. El QR aparecera en unos segundos.' })
+        const { codigo } = req.params
+        await db.collection('licencias').doc(codigo).update({ activa: false })
+        res.json({ ok: true, mensaje: 'Licencia desactivada' })
     } catch (e) {
-        res.status(500).json({ ok: false, mensaje: 'Error al desvincular' })
+        res.status(500).json({ ok: false, mensaje: 'Error: ' + e.message })
     }
 })
 
-// Citas
-app.get('/api/citas', (req, res) => { res.json(todasLasCitas()) })
-
-app.post('/api/citas/cancelar/:id', (req, res) => {
-    cancelarCita(req.params.id)
-    res.json({ ok: true, mensaje: 'Cita cancelada' })
+// Panel HTML
+app.get('/admin', (req, res) => {
+    res.sendFile(join(__dirname, 'index.html'))
 })
 
-app.post('/api/citas/bloquear', (req, res) => {
-    try {
-        const { dia, hora, motivo } = req.body
-        if (!dia || !hora) return res.status(400).json({ ok: false, mensaje: 'Dia y hora requeridos' })
-        bloquearHorario(dia, hora, motivo)
-        res.json({ ok: true, mensaje: 'Horario bloqueado correctamente' })
-    } catch (e) {
-        res.status(500).json({ ok: false, mensaje: 'Error al bloquear: ' + e.message })
-    }
-})
-
-app.post('/api/citas/limpiar', (req, res) => {
-    try {
-        limpiarCitas()
-        res.json({ ok: true, mensaje: 'Todas las citas eliminadas' })
-    } catch (e) {
-        res.status(500).json({ ok: false, mensaje: 'Error al limpiar: ' + e.message })
-    }
-})
-
-// Pedidos
-app.get('/api/pedidos', (req, res) => { res.json(todosPedidos()) })
-
-app.post('/api/pedidos/estado/:id', (req, res) => {
-    try {
-        actualizarEstadoPedido(req.params.id, req.body.estado)
-        res.json({ ok: true, mensaje: 'Estado actualizado' })
-    } catch (e) {
-        res.status(500).json({ ok: false, mensaje: 'Error al actualizar' })
-    }
-})
-
-app.post('/api/pedidos/limpiar', (req, res) => {
-    try {
-        limpiarPedidos()
-        res.json({ ok: true, mensaje: 'Todos los pedidos eliminados' })
-    } catch (e) {
-        res.status(500).json({ ok: false, mensaje: 'Error al limpiar: ' + e.message })
-    }
-})
-
-// Contactos
-app.get('/api/contactos', (req, res) => { res.json(todosLosContactos()) })
-
-app.post('/api/contactos/limpiar', (req, res) => {
-    try {
-        limpiarContactos()
-        res.json({ ok: true, mensaje: 'Todos los contactos eliminados' })
-    } catch (e) {
-        res.status(500).json({ ok: false, mensaje: 'Error al limpiar: ' + e.message })
-    }
-})
-
-// Envio masivo
-app.post('/api/envio-masivo', (req, res) => {
-    try {
-        const { mensaje, contactos } = req.body
-        if (!mensaje) return res.status(400).json({ ok: false, mensaje: 'El mensaje no puede estar vacio' })
-        writeFileSync('./envio_masivo.json', JSON.stringify({
-            mensaje, pendiente: true,
-            contactosSeleccionados: contactos || null,
-            fecha: new Date().toISOString()
-        }), 'utf-8')
-        res.json({ ok: true, mensaje: 'Envio programado correctamente' })
-    } catch (e) {
-        res.status(500).json({ ok: false, mensaje: 'Error al programar envio' })
-    }
-})
-
-// Activar licencia
-app.post('/api/licencia/activar', async (req, res) => {
-    try {
-        const { codigo } = req.body
-        if (!codigo) return res.status(400).json({ ok: false, mensaje: 'Codigo requerido' })
-        const estado = leerEstado()
-        const numeroWhatsapp = estado.numero || null
-        if (!numeroWhatsapp) {
-            return res.json({ ok: false, mensaje: 'Primero vincula tu numero de WhatsApp en la pestana WhatsApp, luego activa la licencia.' })
-        }
-        const resultado = await activarLicencia(codigo, numeroWhatsapp)
-        if (!resultado.valida) return res.json({ ok: false, mensaje: resultado.motivo })
-        writeFileSync('./src/licencia.json', JSON.stringify({ codigo }), 'utf-8')
-        writeFileSync('./bot_comando.json', JSON.stringify({ accion: 'reiniciar', pendiente: true }), 'utf-8')
-        res.json({ ok: true, mensaje: 'Licencia activada y vinculada al numero +' + numeroWhatsapp + '!' })
-    } catch (e) {
-        res.status(500).json({ ok: false, mensaje: 'Error al activar licencia' })
-    }
+app.get('/', (req, res) => {
+    res.sendFile(join(__dirname, 'index.html'))
 })
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
-    console.log('Panel web disponible en http://localhost:' + PORT)
+    console.log(`Panel admin disponible en puerto ${PORT}`)
 })
