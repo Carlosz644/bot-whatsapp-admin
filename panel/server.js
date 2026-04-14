@@ -9,13 +9,23 @@ const app = express()
 app.use(express.json())
 app.use(express.static(__dirname))
 
-// Firebase - con validacion
-console.log('FIREBASE_KEY presente:', !!process.env.FIREBASE_KEY)
-console.log('FIREBASE_KEY primeros chars:', process.env.FIREBASE_KEY?.substring(0, 20))
+// Firebase hardcodeado temporalmente
+const firebaseKey = {
+    type: "service_account",
+    project_id: "bot-whatsapp-licencias",
+    private_key_id: "48aa931b0871fbf2b7ed623a3e9a340f90339f1c",
+    private_key: "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCdp1rGFou6O9PzxwaI6ebk5cGqzSJyFnOZM1NnjTfhMX55Vo/D/WB58LLUDV5BjRUhntwDZLLehJqcsm6KZZPTNLQeQiJphIH2MAZxdLabmwgt9UmN10Xjbx++K/LkSBwAC/v33k0wyuZo47RAJq97CYkKjzTikRsSmkcNbAlj7wZ9Xttkytj8Q4yxSEc9GM4MvAnkkzH2AkNkDWw9zyJ/zpmYSsED/N10/7M0zBucpyIhn62taCPeKvL8aA6+byTOazxvI/E9M6C6AX5Dt4KK/7G9b3uIxT8u+KmUe4WX1RlZsX/CTGMvlXkyWE2VI446kozkRT4TUS/YsZVDK+r9AgMBAAECggEACKgMSW0qfe7UDAIlHzZsqavd7vF1jzshXMufLEPqShCsJ6Bzo2jRt9BaGV+kicfj3aU54mvQkHxKewknHa1HKSUvMKwj9JREiI6JhAhLEI86Kz/ZKpMj8MGExi3ml9dHxk7iJnGL3n59mUvLdWxKXWCgKDbFyhz6lhJnjVqdx2Fd8ytJXcsbaNRQCPHh/HazVpJ0wPXyDj0MskLQu7LhnK7DPl4nvACXCM5OQpiXBX1MCXGJLMVcSMSSGeRDK941IfhMJ7VSlJnjQWVN5Rrobuf9QnjYF7iehUlWEtwjPzzKRa4A1a0fuBQZDjbFmqk9oUVcKQs7A9DSe8I7mBK9wKBgQDLFZQ/KE4AB+DZRe7DgJ72DVkTK5BAow5V4Hjykyv5uEI7PF0YtaKyuGmegsVVND3Ug5G26ZB4bxzoHEY8fFjStl55I/xKQ28V3ShWAWGsvFy3HtC2qHzpCO14Xha2udrh9d5ciIGK7LIt7NFa2GFR2h9Rg3l2DI9o7LMizjYl1wKBgQDGu2aMXb901Bt/pWgIPy8Np2ZtLY+6o6eQFYY/XZ6McXD8EaEIFfxUZaDIZ2kVTBw4Znz+d4Ntz2n/Y1ONTgmMv9IFPbUoVYaESZPQSDHSqoOy+CBSiNT+HT/FOZxF9jyCTGR4jhQhrDms6OJgqn6gCIRO/zfgDiR1xZcpC8MzSwKBgQC3xp1S0fxT1s1IkRpR3JD9BHM4/9EYTPXqDKomibvfzThSNnvgom3K4Uri4GAGjLHvH+i6532PHq2/9eYxUi1m8RVo9oGWCpP56xpXSgTDtekI5V/mC26Ny0BqDmrrjCBhHofMoNLpjuxm1slVNj5LPeHdd+ZwR0l3n8szkfw6HQKBgD+VJbIzLFZMpp+oZCh/TqansHWt5hZo1eubd2A+q8NzaBq96S+VGS5HdbGopE5UE5NX9xXTVxGDEv7K4KiNFzEZDjDvFU7aTjd08v3om0gzlf9ks7K0ZLEI2qZXUFBx/9oQZvTLQFWlrK5NtGAJLIo3L122+kGNRM0JctuHD+URAoGABqUEMnBcMEELT6iTbfejcRsoJg0zxJLKex6KcGj70VBCUBjhmVF4fwdE6cQGmySO4UtqiVVrZHjeyyp6T2bq6XqGnsugi+LsWd0x3I2AZq0VlMp7YSra3QhI1kBqNbsHCp8+zRyWOPpx/jvIBCInE9Kewg+Ku+VR0M8gJ8lhh+g=\n-----END PRIVATE KEY-----\n",
+    client_email: "firebase-adminsdk-fbsvc@bot-whatsapp-licencias.iam.gserviceaccount.com",
+    client_id: "106337392086475541472",
+    auth_uri: "https://accounts.google.com/o/oauth2/auth",
+    token_uri: "https://oauth2.googleapis.com/token",
+    auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
+    client_x509_cert_url: "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40bot-whatsapp-licencias.iam.gserviceaccount.com",
+    universe_domain: "googleapis.com"
+}
 
 let db
 try {
-    const firebaseKey = JSON.parse(process.env.FIREBASE_KEY)
     if (!getApps().length) {
         initializeApp({ credential: cert(firebaseKey) })
     }
@@ -23,7 +33,6 @@ try {
     console.log('Firebase conectado correctamente')
 } catch (e) {
     console.error('ERROR Firebase:', e.message)
-    console.error('FIREBASE_KEY valor:', process.env.FIREBASE_KEY)
 }
 
 function generarCodigo() {
@@ -44,7 +53,7 @@ function fechaVencimiento(dias) {
 }
 
 app.get('/health', (req, res) => {
-    res.json({ ok: true, firebase: !!db, env: !!process.env.FIREBASE_KEY })
+    res.json({ ok: true, firebase: !!db })
 })
 
 app.post('/api/admin/licencias/crear', async (req, res) => {
