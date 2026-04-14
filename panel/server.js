@@ -9,14 +9,23 @@ const app = express()
 app.use(express.json())
 app.use(express.static(__dirname))
 
-// Firebase
-const firebaseKey = JSON.parse(process.env.FIREBASE_KEY)
-if (!getApps().length) {
-    initializeApp({ credential: cert(firebaseKey) })
-}
-const db = getFirestore()
+// Firebase - con validacion
+console.log('FIREBASE_KEY presente:', !!process.env.FIREBASE_KEY)
+console.log('FIREBASE_KEY primeros chars:', process.env.FIREBASE_KEY?.substring(0, 20))
 
-// --- HELPERS ---
+let db
+try {
+    const firebaseKey = JSON.parse(process.env.FIREBASE_KEY)
+    if (!getApps().length) {
+        initializeApp({ credential: cert(firebaseKey) })
+    }
+    db = getFirestore()
+    console.log('Firebase conectado correctamente')
+} catch (e) {
+    console.error('ERROR Firebase:', e.message)
+    console.error('FIREBASE_KEY valor:', process.env.FIREBASE_KEY)
+}
+
 function generarCodigo() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
     const seg = () => Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
@@ -34,36 +43,31 @@ function fechaVencimiento(dias) {
     return d.toISOString().split('T')[0]
 }
 
-// --- RUTAS ---
+app.get('/health', (req, res) => {
+    res.json({ ok: true, firebase: !!db, env: !!process.env.FIREBASE_KEY })
+})
 
-// Crear licencia
 app.post('/api/admin/licencias/crear', async (req, res) => {
+    if (!db) return res.status(500).json({ ok: false, mensaje: 'Firebase no conectado' })
     try {
         const { negocio, tipo } = req.body
         if (!negocio) return res.status(400).json({ ok: false, mensaje: 'Negocio requerido' })
-
         const codigo = generarCodigo()
         const dias = diasPorTipo(tipo || 'mensual')
-
         await db.collection('licencias').doc(codigo).set({
-            codigo,
-            negocio,
-            tipo: tipo || 'mensual',
-            activa: true,
+            codigo, negocio, tipo: tipo || 'mensual', activa: true,
             creadaEn: new Date().toISOString().split('T')[0],
             vencimiento: fechaVencimiento(dias),
-            numeroWhatsapp: null,
-            activadaEn: null
+            numeroWhatsapp: null, activadaEn: null
         })
-
         res.json({ ok: true, codigo, mensaje: 'Licencia creada correctamente' })
     } catch (e) {
         res.status(500).json({ ok: false, mensaje: 'Error al crear: ' + e.message })
     }
 })
 
-// Listar licencias
 app.get('/api/admin/licencias', async (req, res) => {
+    if (!db) return res.status(500).json([])
     try {
         const snap = await db.collection('licencias').get()
         const licencias = []
@@ -75,23 +79,21 @@ app.get('/api/admin/licencias', async (req, res) => {
     }
 })
 
-// Desactivar licencia
 app.post('/api/admin/licencias/desactivar/:codigo', async (req, res) => {
+    if (!db) return res.status(500).json({ ok: false, mensaje: 'Firebase no conectado' })
     try {
-        const { codigo } = req.params
-        await db.collection('licencias').doc(codigo).update({ activa: false })
+        await db.collection('licencias').doc(req.params.codigo).update({ activa: false })
         res.json({ ok: true, mensaje: 'Licencia desactivada' })
     } catch (e) {
         res.status(500).json({ ok: false, mensaje: 'Error: ' + e.message })
     }
 })
 
-// Servir panel
 app.get('*', (req, res) => {
     res.sendFile(join(__dirname, 'index.html'))
 })
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
-    console.log(`Panel admin disponible en puerto ${PORT}`)
+    console.log(`Panel admin en puerto ${PORT}`)
 })
