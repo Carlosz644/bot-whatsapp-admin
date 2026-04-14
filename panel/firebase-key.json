@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "bot-whatsapp-licencias-5dcbf",
+  "private_key_id": "783aacf30b64e23de99a65be0e52e95b0e395138",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCgyb/crFvC7OG7\ngX3siCYISTxiD3oKzCDHk9Go+71QVKn25jOyum0OGeR+GIMYFZ75LO7izPfJ1qxB\ndBMGKQDssIYKKnb32ijxlj3WaHZTWh19OPVcqazpXcjnW+CVLHLIQLSOq6ynmUDU\nfYkNLW6kmy/R850LynkOWZ6PxJuB2EXcpQAvhbMdVMdOyovUob+2Pvg+nz/QhsJi\nfhNvQQCLIZUufGczt+97NPNDb0nykD2IF1RsY/2R57YWsHrH+oP+Je5Xth4rkT+H\n3RngTh07CTBhNk5c58U9pjImy1jWZ00IA/ABTi/khH3uUMmBaCTX2SpNTK7sqxvT\nBme8gsWlAgMBAAECggEAM8nn33cwsy9DYfbKjYYo4eBc76TWhWXMZRwqmshC6P3s\nJNdu7XF4sOMMIsVYbEiChPXBGBI2+a8Imqh9fC1228Xb1qho21pMd8wRrN7GxgAv\noWbYOPl59Uy86jBAvSus6O1WeuG24eDN7eNlYnYwvhoyI+jYu7SCm2moVdxYzlBN\nLu02Tu3YXFik7zg2WVvn2UJMOQykGD4ALEabgNFodeWCneAutYmTZH6AnBBq3AAt\nh9xsapuJHVHvir+SpEG1b2vNJQxYJigytHgtNbTWjSAQe9ZgMbb8IvLdC5+KblDp\nIRrhqFHh17n8mbSs2BSyksmDXU260P3SP1aZDM/cfQKBgQDPFROuxl4bflScniC5\n+HEupY1vhaCIobYoJUh+qCKe0AOjGuGQnGkoFHN5w/RQlFjx2x5UGOlOwZG1XBjI\nn+XKM8hieLB6gGPh6Xz/7YZVdVMnuVhhbJEDDPiIzN5sjpCmAYyA8rdXGh/q74QK\nAl4G2Cu3Y1I/yJSUJ9OsRs0vawKBgQDGxRzzlyolzUqXCgFNBTbMNYwaSP+4a9n/\nDUiyY1i5Uwn0BkE+vuN2mEYTY7IkpWd1r1mngPInjqcTuXOAraY5M2MOuqIt1/ja\n7J+nS87Y+1HEpU9H+qUnF4zVFuCc5UMExVdxvBdcO8ZzlrfPKwBVnzCbNC96fudB\nAwcRhh5zLwKBgQCDQqPgQ8LBAJmXULAD0VPEspFtIDF6ia5R0hgamG6hZc74YwCZ\nTltlWVk81JWXQgEDBNY7jjLMhevbHk5jVN8uBRa+PCv46krllr9x5dghcSXNZzF7\nR3q/iUg8RkeyXceYQiESV0cZQej7XOjAA3IgOoOzUZR/858iLgCBEbvbkwKBgC1a\nyNJkSb+6aiywob9bUzeheEh/I6qHIYTrGQ1rUdFnuzutObIBiJGFCWhfNUTbYRIf\nYsuvxpF0IXeEt3BDL0yaBx5TQ7JGN4hsublIuPgV0ICYX9DCxnB3FTGCONpUDcjG\n5r8S9hmbohq551MkMr1Wx5aCf9rpngbdk/1Rpx0NAoGAGnza+4FRvKCUhoTuhBZ0\n0iNdhj4kAYMiloImPpfL1Xl41Rkp+R4cN9yl+Ajmanhp61xj515iJ/uYvAiWh8gB\nhGURF/k0vC9KpSdxcjiPm6CZrb5Tmp6uMnEQdLPlbjGrrbyIlvPjHdHf+wCEN2+h\nTR3E741zrO17VTFHg0T/Wr0=\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-fbsvc@bot-whatsapp-licencias-5dcbf.iam.gserviceaccount.com",
+  "client_id": "106900626375135790130",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40bot-whatsapp-licencias-5dcbf.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
