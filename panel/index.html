@@ -3,629 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel - Bot WhatsApp</title>
+    <title>Admin - Licencias Bot WhatsApp</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f0f2f5; color: #333; }
-        header { background: #25D366; color: white; padding: 20px; text-align: center; }
+        header { background: #128C7E; color: white; padding: 20px; text-align: center; }
         header h1 { font-size: 24px; }
-        .tabs { display: flex; background: white; border-bottom: 2px solid #f0f2f5; overflow-x: auto; }
-        .tab { padding: 15px 20px; cursor: pointer; font-weight: bold; color: #888; border-bottom: 3px solid transparent; white-space: nowrap; font-size: 14px; }
-        .tab.activo { color: #25D366; border-bottom-color: #25D366; }
-        .seccion { display: none; }
-        .seccion.activa { display: block; }
-        .container { max-width: 900px; margin: 30px auto; padding: 0 20px; }
+        header p { font-size: 14px; opacity: 0.8; margin-top: 5px; }
+        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
         .card { background: white; border-radius: 10px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .card h2 { color: #25D366; margin-bottom: 20px; font-size: 18px; border-bottom: 2px solid #f0f2f5; padding-bottom: 10px; }
+        .card h2 { color: #128C7E; margin-bottom: 20px; font-size: 18px; border-bottom: 2px solid #f0f2f5; padding-bottom: 10px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; color: #555; }
-        input, textarea, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; margin-bottom: 15px; }
-        textarea { height: 80px; resize: vertical; }
-        .producto { background: #f9f9f9; border: 1px solid #eee; border-radius: 8px; padding: 15px; margin-bottom: 10px; position: relative; }
-        .btn-eliminar { position: absolute; top: 10px; right: 10px; background: #ff4444; color: white; border: none; border-radius: 5px; padding: 5px 10px; cursor: pointer; font-size: 12px; }
-        .btn-agregar { background: #f0f2f5; border: 2px dashed #25D366; color: #25D366; width: 100%; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; margin-bottom: 15px; }
-        .btn-guardar { background: #25D366; color: white; border: none; width: 100%; padding: 15px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn-guardar:hover { background: #1ea855; }
-        .btn-rojo { background: #ff4444; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; }
-        .btn-azul { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; }
-        .btn-naranja { background: #ff8c00; color: white; border: none; padding: 8px 15px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; margin-bottom: 15px; }
+        .btn { color: white; border: none; padding: 12px 25px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; }
+        .btn-verde { background: #128C7E; width: 100%; padding: 15px; font-size: 16px; }
+        .btn-verde:hover { background: #0e6b5e; }
+        .btn-rojo { background: #ff4444; }
+        .btn-gris { background: #888; }
         .alerta { padding: 12px; border-radius: 6px; margin-bottom: 15px; display: none; text-align: center; font-weight: bold; }
         .alerta.ok { background: #d4edda; color: #155724; }
         .alerta.error { background: #f8d7da; color: #721c24; }
-        .disponible { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-        .disponible input { width: auto; margin: 0; }
-        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
         th { background: #f0f2f5; padding: 10px; text-align: left; font-weight: bold; color: #555; }
         td { padding: 10px; border-bottom: 1px solid #f0f2f5; vertical-align: middle; }
         tr:hover td { background: #fafafa; }
         .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
-        .badge.confirmada { background: #d4edda; color: #155724; }
-        .badge.cancelada { background: #f8d7da; color: #721c24; }
-        .badge.bloqueada { background: #fff3cd; color: #856404; }
-        .badge.recibido { background: #fff3cd; color: #856404; }
-        .badge.entregado { background: #d4edda; color: #155724; }
-        .badge.cancelado { background: #f8d7da; color: #721c24; }
-        .acciones { display: flex; gap: 5px; flex-wrap: wrap; }
-        .btn-entregado { background: #25D366; color: white; border: none; border-radius: 5px; padding: 5px 10px; cursor: pointer; font-size: 12px; }
-        .btn-cancelar { background: #ff4444; color: white; border: none; border-radius: 5px; padding: 5px 10px; cursor: pointer; font-size: 12px; }
-        .btn-refrescar { background: #f0f2f5; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 13px; float: right; }
-        .btn-limpiar { background: #ff4444; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 13px; float: right; margin-left: 8px; font-weight: bold; }
+        .badge.activa { background: #d4edda; color: #155724; }
+        .badge.vencida { background: #f8d7da; color: #721c24; }
+        .badge.inactiva { background: #e2e3e5; color: #555; }
+        .codigo { font-family: monospace; font-size: 13px; font-weight: bold; background: #f0f2f5; padding: 5px 8px; border-radius: 6px; letter-spacing: 1px; }
         .resumen { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
         .resumen-card { background: white; border-radius: 10px; padding: 20px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .resumen-card .numero { font-size: 36px; font-weight: bold; color: #25D366; }
+        .resumen-card .numero { font-size: 36px; font-weight: bold; color: #128C7E; }
         .resumen-card .etiqueta { font-size: 14px; color: #888; margin-top: 5px; }
-        .hint { color: #888; font-size: 13px; margin-bottom: 15px; }
-        .estado-bot { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding: 15px; border-radius: 10px; }
-        .estado-bot.conectado { background: #d4edda; }
-        .estado-bot.desconectado { background: #fff3cd; }
-        .estado-bot.qr { background: #e3f2fd; }
-        .punto { width: 12px; height: 12px; border-radius: 50%; }
-        .punto.verde { background: #25D366; }
-        .punto.amarillo { background: #ffc107; }
-        .punto.azul { background: #007bff; }
-        .qr-img { display: block; margin: 15px auto; max-width: 250px; border: 1px solid #ddd; border-radius: 8px; padding: 10px; background: white; }
-        .contacto-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f0f2f5; }
-        .contacto-row input[type="checkbox"] { width: auto; margin: 0; }
-        .botones-masivo { display: flex; gap: 10px; margin-bottom: 15px; }
-        .btn-secundario { background: #f0f2f5; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 13px; }
-        .bloqueo-row { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; align-items: end; }
-        .bloqueo-row input { margin-bottom: 0; }
-        .bloqueo-row button { padding: 10px 15px; white-space: nowrap; }
+        .acciones { display: flex; gap: 5px; }
+        .resultado-licencia { background: #f0f9f6; border: 2px solid #128C7E; border-radius: 8px; padding: 20px; margin-top: 15px; display: none; }
+        .codigo-grande { font-family: monospace; font-size: 22px; font-weight: bold; color: #128C7E; letter-spacing: 3px; text-align: center; padding: 15px; background: white; border-radius: 6px; margin: 10px 0; border: 2px dashed #128C7E; }
     </style>
 </head>
 <body>
     <header>
-        <h1>Panel de administracion - Bot WhatsApp</h1>
+        <h1>Panel de Administracion</h1>
+        <p>Gestion de licencias - Bot WhatsApp</p>
     </header>
 
-    <div class="tabs">
-        <div class="tab activo" onclick="cambiarTab('inicio', this)">Inicio</div>
-        <div class="tab" onclick="cambiarTab('citas', this)">Citas</div>
-        <div class="tab" onclick="cambiarTab('pedidos', this)">Pedidos</div>
-        <div class="tab" onclick="cambiarTab('contactos', this)">Contactos</div>
-        <div class="tab" onclick="cambiarTab('licencia', this)">Licencia</div>
-        <div class="tab" onclick="cambiarTab('whatsapp', this)">WhatsApp</div>
-        <div class="tab" onclick="cambiarTab('config', this)">Configuracion</div>
-    </div>
+    <div class="container">
 
-    <!-- INICIO -->
-    <div class="seccion activa" id="tab-inicio">
-        <div class="container">
-            <div class="resumen">
-                <div class="resumen-card"><div class="numero" id="total-citas">0</div><div class="etiqueta">Citas hoy</div></div>
-                <div class="resumen-card"><div class="numero" id="total-pedidos">0</div><div class="etiqueta">Pedidos pendientes</div></div>
-                <div class="resumen-card"><div class="numero" id="total-ingresos">$0</div><div class="etiqueta">Ingresos del dia</div></div>
+        <!-- RESUMEN -->
+        <div class="resumen">
+            <div class="resumen-card">
+                <div class="numero" id="total-activas">0</div>
+                <div class="etiqueta">Licencias activas</div>
             </div>
-            <div class="card">
-                <h2>Citas de hoy</h2>
-                <table><thead><tr><th>Folio</th><th>Nombre</th><th>Servicio</th><th>Hora</th><th>Estado</th></tr></thead><tbody id="citas-hoy"></tbody></table>
+            <div class="resumen-card">
+                <div class="numero" id="total-vencidas">0</div>
+                <div class="etiqueta">Licencias vencidas</div>
             </div>
-            <div class="card">
-                <h2>Pedidos pendientes</h2>
-                <table><thead><tr><th>Folio</th><th>Producto</th><th>Precio</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody id="pedidos-pendientes"></tbody></table>
+            <div class="resumen-card">
+                <div class="numero" id="total-todas">0</div>
+                <div class="etiqueta">Total licencias</div>
             </div>
         </div>
-    </div>
 
-    <!-- CITAS -->
-    <div class="seccion" id="tab-citas">
-        <div class="container">
-            <div class="card">
-                <h2>Bloquear horario manualmente</h2>
-                <p class="hint">Bloquea una hora para que el bot no permita citas en ese horario. Util cuando alguien agenda por telefono o en persona.</p>
-                <div class="bloqueo-row">
-                    <div><label>Dia</label><input type="text" id="bloqueo-dia" placeholder="Ej: Lunes, 25/03/2026"></div>
-                    <div><label>Hora</label><input type="text" id="bloqueo-hora" placeholder="Ej: 10:00am"></div>
-                    <div><label>Motivo (opcional)</label><input type="text" id="bloqueo-motivo" placeholder="Ej: Cita telefonica"></div>
-                    <div><button class="btn-naranja" onclick="bloquearHorario()">Bloquear</button></div>
-                </div>
-                <div class="alerta" id="alerta-bloqueo"></div>
-            </div>
-            <div class="card">
-                <h2>Todas las citas
-                    <button class="btn-refrescar" onclick="cargarCitas()">Refrescar</button>
-                    <button class="btn-limpiar" onclick="limpiarCitas()">Limpiar todo</button>
-                </h2>
-                <div class="alerta" id="alerta-citas"></div>
-                <table><thead><tr><th>Folio</th><th>Nombre</th><th>Servicio</th><th>Dia</th><th>Hora</th><th>Estado</th><th>Accion</th></tr></thead><tbody id="tabla-citas"></tbody></table>
+        <!-- GENERAR LICENCIA -->
+        <div class="card">
+            <h2>Generar nueva licencia</h2>
+            <div class="alerta" id="alerta-crear"></div>
+            <label>Nombre del negocio o cliente</label>
+            <input type="text" id="negocio" placeholder="Ej: Veterinaria Lopez">
+            <label>Plan</label>
+            <select id="tipo">
+                <option value="prueba">Prueba — 7 dias</option>
+                <option value="mensual">Mensual — 30 dias</option>
+                <option value="trimestral">Trimestral — 90 dias</option>
+                <option value="semestral">Semestral — 180 dias</option>
+                <option value="anual">Anual — 365 dias</option>
+            </select>
+            <button class="btn btn-verde" onclick="generarLicencia()">Generar licencia</button>
+            <div class="resultado-licencia" id="resultado-licencia">
+                <p style="text-align:center;color:#555;margin-bottom:5px">Licencia generada exitosamente</p>
+                <div class="codigo-grande" id="codigo-generado"></div>
+                <p style="text-align:center;font-size:13px;color:#888">Comparte este codigo con tu cliente para que lo ingrese en su panel</p>
             </div>
         </div>
-    </div>
 
-    <!-- PEDIDOS -->
-    <div class="seccion" id="tab-pedidos">
-        <div class="container">
-            <div class="card">
-                <h2>Todos los pedidos
-                    <button class="btn-refrescar" onclick="cargarPedidos()">Refrescar</button>
-                    <button class="btn-limpiar" onclick="limpiarPedidos()">Limpiar todo</button>
-                </h2>
-                <div class="alerta" id="alerta-pedidos"></div>
-                <table><thead><tr><th>Folio</th><th>Producto</th><th>Precio</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody id="tabla-pedidos"></tbody></table>
-            </div>
+        <!-- LISTA DE LICENCIAS -->
+        <div class="card">
+            <h2>Todas las licencias
+                <button class="btn btn-gris" style="float:right;padding:8px 15px;font-size:13px" onclick="cargarLicencias()">Refrescar</button>
+            </h2>
+            <div class="alerta" id="alerta-lista"></div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Codigo</th>
+                        <th>Negocio</th>
+                        <th>Plan</th>
+                        <th>Numero WhatsApp</th>
+                        <th>Activada</th>
+                        <th>Vencimiento</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-licencias"></tbody>
+            </table>
         </div>
-    </div>
 
-    <!-- CONTACTOS -->
-    <div class="seccion" id="tab-contactos">
-        <div class="container">
-            <div class="card">
-                <h2>Envio masivo de mensajes</h2>
-                <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:12px;margin-bottom:15px;font-size:13px;color:#856404">
-                    <strong>Advertencia — Uso bajo tu propio riesgo</strong><br><br>
-                    El envio masivo puede resultar en el <strong>bloqueo permanente e irreversible de tu numero</strong> de WhatsApp.<br><br>
-                    • <strong>Entre mas nuevo sea tu numero, mayor es el riesgo</strong> de ser baneado incluso con pocos mensajes<br>
-                    • Solo envia a personas que ya te escribieron primero<br>
-                    • Si varios destinatarios te reportan como spam, WhatsApp bloquea tu numero sin previo aviso<br>
-                    • No abuses de esta funcion: usala con moderacion y criterio<br><br>
-                    <strong>El uso de esta funcion es tu responsabilidad.</strong>
-                </div>
-                <label>Escribe el mensaje</label>
-                <textarea id="mensaje-masivo" placeholder="Ej: Hola! Hoy tenemos 20% de descuento. Visitanos!" style="height:120px"></textarea>
-                <div class="botones-masivo">
-                    <button class="btn-secundario" onclick="seleccionarTodos()">Seleccionar todos</button>
-                    <button class="btn-secundario" onclick="deseleccionarTodos()">Deseleccionar todos</button>
-                    <button class="btn-rojo" style="padding:8px 15px;font-size:13px" onclick="limpiarContactos()">Limpiar contactos</button>
-                </div>
-                <div id="total-contactos" class="hint"></div>
-                <div class="alerta" id="alerta-contactos"></div>
-                <div id="lista-contactos-masivo"></div>
-                <button class="btn-guardar" style="margin-top:15px" onclick="enviarMasivo()">Enviar a contactos seleccionados</button>
-                <div class="alerta" id="alerta-masivo" style="margin-top:15px"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- LICENCIA -->
-    <div class="seccion" id="tab-licencia">
-        <div class="container">
-            <div class="card">
-                <h2>Mi licencia</h2>
-                <div id="estado-licencia" style="margin-bottom:20px"></div>
-                <label>Codigo de licencia</label>
-                <input type="text" id="codigo-licencia" placeholder="Ej: ABCD-1234-EFGH" style="font-family:monospace;letter-spacing:2px;font-size:16px">
-                <button class="btn-guardar" onclick="activarLicencia()">Activar licencia</button>
-                <div class="alerta" id="alerta-licencia" style="margin-top:15px"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- WHATSAPP -->
-    <div class="seccion" id="tab-whatsapp">
-        <div class="container">
-            <div class="card">
-                <h2>Estado de WhatsApp</h2>
-                <div id="estado-bot-panel"></div>
-                <div id="qr-panel"></div>
-                <div style="display:flex;gap:10px;margin-top:20px">
-                    <button class="btn-azul" onclick="reiniciarBot()">Reiniciar bot</button>
-                    <button class="btn-rojo" onclick="desvincularNumero()">Desvincular numero</button>
-                </div>
-                <div class="alerta" id="alerta-whatsapp" style="margin-top:15px"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- CONFIGURACION -->
-    <div class="seccion" id="tab-config">
-        <div class="container">
-            <div class="alerta" id="alerta"></div>
-            <div class="card">
-                <h2>Informacion del negocio</h2>
-                <label>Nombre del negocio</label>
-                <input type="text" id="nombreNegocio" placeholder="Ej: Veterinaria Lopez">
-                <label>Mensaje de bienvenida</label>
-                <textarea id="mensajeBienvenida" placeholder="Ej: Somos tu veterinaria de confianza..."></textarea>
-                <label>Telefono del asesor</label>
-                <input type="text" id="telefonoAsesor" placeholder="Ej: 449-123-4567">
-            </div>
-            <div class="card">
-                <h2>Horarios</h2>
-                <label>Horarios de atencion</label>
-                <textarea id="horarios" placeholder="Ej: Lunes a Viernes: 9am - 7pm"></textarea>
-                <label>Hora de apertura (formato 24hrs)</label>
-                <input type="number" id="horarioApertura" min="0" max="23" placeholder="Ej: 9">
-                <label>Hora de cierre (formato 24hrs)</label>
-                <input type="number" id="horarioCierre" min="0" max="23" placeholder="Ej: 19">
-            </div>
-            <div class="card">
-                <h2>Configuracion de citas y mensajes</h2>
-                <label>Intervalo entre citas (minutos)</label>
-                <p class="hint">Define cada cuanto tiempo se pueden agendar citas. Ej: medico = 60 min, estetica = 45 min, barberia = 30 min.</p>
-                <select id="intervaloCitas">
-                    <option value="15">15 minutos</option>
-                    <option value="20">20 minutos</option>
-                    <option value="30">30 minutos</option>
-                    <option value="45">45 minutos</option>
-                    <option value="60" selected>1 hora (60 minutos)</option>
-                    <option value="90">1 hora 30 minutos</option>
-                    <option value="120">2 horas</option>
-                </select>
-                <label>Tiempo de reset de conversacion (minutos)</label>
-                <p class="hint">Tiempo que espera el bot antes de volver a mostrar el menu al mismo cliente. Evita que el bot responda en bucle.</p>
-                <input type="number" id="tiempoReset" min="1" max="60" placeholder="Ej: 7">
-                <label>Delay de respuesta normal (segundos)</label>
-                <p class="hint">Tiempo minimo que espera el bot antes de responder cada mensaje individual. Simula escritura humana. Minimo 2 segundos recomendado.</p>
-                <select id="delayRespuesta">
-                    <option value="2" selected>2-3 segundos (recomendado)</option>
-                    <option value="3">3-4 segundos</option>
-                    <option value="5">5-6 segundos</option>
-                    <option value="8">8-9 segundos</option>
-                    <option value="10">10-11 segundos</option>
-                    <option value="15">15-16 segundos</option>
-                    <option value="20">20-21 segundos</option>
-                    <option value="30">30-31 segundos</option>
-                </select>
-                <label>Intervalo entre mensajes masivos (segundos)</label>
-                <p class="hint">Tiempo que espera el bot entre cada mensaje del envio masivo. Diferente al delay normal — este aplica SOLO al envio masivo.</p>
-                <select id="intervaloMasivo">
-                    <option value="2">2 segundos (riesgo alto)</option>
-                    <option value="3" selected>3 segundos (recomendado)</option>
-                    <option value="5">5 segundos (seguro)</option>
-                    <option value="10">10 segundos (muy seguro)</option>
-                    <option value="15">15 segundos (maxima seguridad)</option>
-                </select>
-            </div>
-            <div class="card">
-                <h2>Ubicacion</h2>
-                <label>Direccion</label>
-                <input type="text" id="direccion" placeholder="Ej: Av. Principal #123">
-                <label>Link de Google Maps</label>
-                <input type="text" id="linkMaps" placeholder="https://maps.google.com/...">
-            </div>
-            <div class="card">
-                <h2>Menu del bot</h2>
-                <p class="hint">Personaliza las opciones que ve el cliente cuando escribe "hola".</p>
-                <div id="menu-items"></div>
-                <button class="btn-agregar" onclick="agregarOpcionMenu()">+ Agregar opcion al menu</button>
-            </div>
-            <div class="card">
-                <h2>Catalogo de productos</h2>
-                <p class="hint">Agrega los productos o servicios que ofreces.</p>
-                <div id="productos"></div>
-                <button class="btn-agregar" onclick="agregarProducto()">+ Agregar producto</button>
-            </div>
-            <button class="btn-guardar" onclick="guardar()">Guardar cambios</button>
-        </div>
     </div>
 
     <script>
-        let config = {}
-        let contactosTodos = []
-        let intervalEstado = null
+        const API = window.location.origin + '/api/admin'
 
-        function cambiarTab(tab, el) {
-            document.querySelectorAll('.seccion').forEach(s => s.classList.remove('activa'))
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('activo'))
-            document.getElementById('tab-' + tab).classList.add('activa')
-            el.classList.add('activo')
-            if (intervalEstado) clearInterval(intervalEstado)
-            if (tab === 'inicio') cargarInicio()
-            if (tab === 'citas') cargarCitas()
-            if (tab === 'pedidos') cargarPedidos()
-            if (tab === 'contactos') cargarContactos()
-            if (tab === 'licencia') cargarLicencia()
-            if (tab === 'whatsapp') {
-                cargarEstadoBot()
-                intervalEstado = setInterval(cargarEstadoBot, 3000)
-            }
-            if (tab === 'config') cargarConfig()
-        }
+        async function generarLicencia() {
+            const negocio = document.getElementById('negocio').value.trim()
+            const tipo = document.getElementById('tipo').value
+            if (!negocio) { alert('Por favor ingresa el nombre del negocio'); return }
 
-        async function cargarLicencia() {
-            const estado = await fetch('/api/bot/estado').then(r => r.json())
-            const div = document.getElementById('estado-licencia')
-            if (estado.licencia && estado.licencia.valida) {
-                div.innerHTML = `<div style="background:#d4edda;padding:15px;border-radius:8px;color:#155724"><strong>Licencia activa</strong><br>Negocio: ${estado.licencia.negocio}<br>Plan: ${estado.licencia.tipo}<br>Vence: ${estado.licencia.vencimiento}</div>`
-            } else if (estado.licencia && !estado.licencia.valida) {
-                div.innerHTML = `<div style="background:#f8d7da;padding:15px;border-radius:8px;color:#721c24"><strong>Licencia inactiva</strong><br>${estado.licencia.motivo || 'Ingresa tu codigo de licencia'}</div>`
-            } else {
-                div.innerHTML = `<div style="background:#fff3cd;padding:15px;border-radius:8px;color:#856404"><strong>Sin licencia</strong><br>Ingresa el codigo que te proporcionaron para activar el bot.</div>`
-            }
-        }
-
-        async function activarLicencia() {
-            const codigo = document.getElementById('codigo-licencia').value.trim().toUpperCase()
-            if (!codigo) { alert('Por favor ingresa el codigo de licencia'); return }
-            const res = await fetch('/api/licencia/activar', {
+            const res = await fetch(API + '/licencias/crear', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ codigo })
+                body: JSON.stringify({ negocio, tipo })
             })
             const data = await res.json()
-            mostrarAlerta('alerta-licencia', data.ok, data.mensaje)
+
             if (data.ok) {
-                document.getElementById('codigo-licencia').value = ''
-                setTimeout(() => cargarLicencia(), 2000)
-            }
-        }
-
-        async function cargarEstadoBot() {
-            const estado = await fetch('/api/bot/estado').then(r => r.json())
-            const panel = document.getElementById('estado-bot-panel')
-            const qrPanel = document.getElementById('qr-panel')
-            if (estado.conectado) {
-                const licencia = estado.licencia
-                const mensajeLicencia = licencia && licencia.valida
-                    ? 'Licencia activa hasta: ' + licencia.vencimiento
-                    : 'Numero vinculado! Ahora ve a la pestana Licencia e ingresa tu codigo.'
-                panel.innerHTML = `<div class="estado-bot conectado"><div class="punto verde"></div><div><strong>Numero vinculado correctamente!</strong><br><span style="font-size:13px;color:#555">Numero: +${estado.numero}</span><br><span style="font-size:13px;color:#128C7E;font-weight:bold">${mensajeLicencia}</span></div></div>`
-                qrPanel.innerHTML = ''
-            } else if (estado.qr) {
-                panel.innerHTML = `<div class="estado-bot qr"><div class="punto azul"></div><strong>Escanea el QR con WhatsApp para vincular el numero</strong></div>`
-                qrPanel.innerHTML = `<img class="qr-img" src="${estado.qr}" alt="QR WhatsApp">`
+                document.getElementById('codigo-generado').textContent = data.codigo
+                document.getElementById('resultado-licencia').style.display = 'block'
+                document.getElementById('negocio').value = ''
+                mostrarAlerta('alerta-crear', true, 'Licencia creada correctamente')
+                cargarLicencias()
             } else {
-                panel.innerHTML = `<div class="estado-bot desconectado"><div class="punto amarillo"></div><strong>Bot desconectado o iniciando...</strong></div>`
-                qrPanel.innerHTML = ''
+                mostrarAlerta('alerta-crear', false, data.mensaje)
             }
         }
 
-        async function reiniciarBot() {
-            if (!confirm('Reiniciar el bot?')) return
-            const res = await fetch('/api/bot/reiniciar', { method: 'POST' })
+        async function desactivarLicencia(codigo) {
+            if (!confirm('Desactivar licencia ' + codigo + '?')) return
+            const res = await fetch(API + '/licencias/desactivar/' + codigo, { method: 'POST' })
             const data = await res.json()
-            mostrarAlerta('alerta-whatsapp', data.ok, data.mensaje)
+            mostrarAlerta('alerta-lista', data.ok, data.mensaje)
+            cargarLicencias()
         }
 
-        async function desvincularNumero() {
-            if (!confirm('Desvincular el numero actual? Se generara un nuevo QR.')) return
-            const res = await fetch('/api/bot/desvincular', { method: 'POST' })
-            const data = await res.json()
-            mostrarAlerta('alerta-whatsapp', data.ok, data.mensaje)
-        }
+        async function cargarLicencias() {
+            try {
+                const licencias = await fetch(API + '/licencias').then(r => r.json())
+                const ahora = new Date()
 
-        async function bloquearHorario() {
-            const dia = document.getElementById('bloqueo-dia').value.trim()
-            const hora = document.getElementById('bloqueo-hora').value.trim()
-            const motivo = document.getElementById('bloqueo-motivo').value.trim()
-            if (!dia || !hora) { alert('Por favor ingresa el dia y la hora'); return }
-            const res = await fetch('/api/citas/bloquear', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ dia, hora, motivo })
-            })
-            const data = await res.json()
-            mostrarAlerta('alerta-bloqueo', data.ok, data.ok ? 'Horario bloqueado correctamente' : data.mensaje)
-            if (data.ok) {
-                document.getElementById('bloqueo-dia').value = ''
-                document.getElementById('bloqueo-hora').value = ''
-                document.getElementById('bloqueo-motivo').value = ''
-                cargarCitas()
+                const activas = licencias.filter(l => l.activa && new Date(l.vencimiento) > ahora)
+                const vencidas = licencias.filter(l => !l.activa || new Date(l.vencimiento) <= ahora)
+
+                document.getElementById('total-activas').textContent = activas.length
+                document.getElementById('total-vencidas').textContent = vencidas.length
+                document.getElementById('total-todas').textContent = licencias.length
+
+                const tbody = document.getElementById('tabla-licencias')
+                tbody.innerHTML = licencias.length === 0
+                    ? '<tr><td colspan="8" style="text-align:center;color:#888">No hay licencias generadas aun</td></tr>'
+                    : licencias.map(l => {
+                        const vencimiento = new Date(l.vencimiento)
+                        const vencida = vencimiento < ahora
+                        const estado = !l.activa ? 'inactiva' : vencida ? 'vencida' : 'activa'
+                        const estadoTexto = !l.activa ? 'Inactiva' : vencida ? 'Vencida' : 'Activa'
+                        return `<tr>
+                            <td><span class="codigo">${l.codigo}</span></td>
+                            <td>${l.negocio}</td>
+                            <td>${l.tipo}</td>
+                            <td>${l.numeroWhatsapp ? '+' + l.numeroWhatsapp : '<span style="color:#888">No activada</span>'}</td>
+                            <td>${l.activadaEn || '<span style="color:#888">—</span>'}</td>
+                            <td>${l.vencimiento}</td>
+                            <td><span class="badge ${estado}">${estadoTexto}</span></td>
+                            <td class="acciones">
+                                ${estado === 'activa' ? `<button class="btn btn-rojo" onclick="desactivarLicencia('${l.codigo}')">Desactivar</button>` : '-'}
+                            </td>
+                        </tr>`
+                    }).join('')
+            } catch (e) {
+                document.getElementById('tabla-licencias').innerHTML = '<tr><td colspan="8" style="text-align:center;color:#888">Error cargando licencias</td></tr>'
             }
-        }
-
-        async function limpiarCitas() {
-            if (!confirm('Seguro que quieres eliminar TODAS las citas? Esta accion no se puede deshacer.')) return
-            const res = await fetch('/api/citas/limpiar', { method: 'POST' })
-            const data = await res.json()
-            mostrarAlerta('alerta-citas', data.ok, data.mensaje)
-            cargarCitas()
-            cargarInicio()
-        }
-
-        async function limpiarPedidos() {
-            if (!confirm('Seguro que quieres eliminar TODOS los pedidos? Esta accion no se puede deshacer.')) return
-            const res = await fetch('/api/pedidos/limpiar', { method: 'POST' })
-            const data = await res.json()
-            mostrarAlerta('alerta-pedidos', data.ok, data.mensaje)
-            cargarPedidos()
-            cargarInicio()
-        }
-
-        async function limpiarContactos() {
-            if (!confirm('Seguro que quieres eliminar TODOS los contactos? Esta accion no se puede deshacer.')) return
-            const res = await fetch('/api/contactos/limpiar', { method: 'POST' })
-            const data = await res.json()
-            mostrarAlerta('alerta-contactos', data.ok, data.mensaje)
-            cargarContactos()
-        }
-
-        async function cargarInicio() {
-            const [citas, pedidos] = await Promise.all([
-                fetch('/api/citas').then(r => r.json()),
-                fetch('/api/pedidos').then(r => r.json())
-            ])
-            const hoy = new Date().toLocaleDateString('es-MX', { weekday: 'long' }).toLowerCase()
-            const citasHoy = citas.filter(c => c.dia.toLowerCase().includes(hoy) && c.estado === 'confirmada')
-            const pedidosPendientes = pedidos.filter(p => p.estado === 'recibido')
-            const ingresos = pedidos.filter(p => p.estado === 'entregado').reduce((sum, p) => sum + p.precio, 0)
-            document.getElementById('total-citas').textContent = citasHoy.length
-            document.getElementById('total-pedidos').textContent = pedidosPendientes.length
-            document.getElementById('total-ingresos').textContent = '$' + ingresos
-            document.getElementById('citas-hoy').innerHTML = citasHoy.length === 0
-                ? '<tr><td colspan="5" style="text-align:center;color:#888">No hay citas para hoy</td></tr>'
-                : citasHoy.map(c => `<tr><td>#${c.id}</td><td>${c.nombre}</td><td>${c.servicio}</td><td>${c.hora}</td><td><span class="badge ${c.estado}">${c.estado}</span></td></tr>`).join('')
-            document.getElementById('pedidos-pendientes').innerHTML = pedidosPendientes.length === 0
-                ? '<tr><td colspan="5" style="text-align:center;color:#888">No hay pedidos pendientes</td></tr>'
-                : pedidosPendientes.map(p => `<tr><td>#${p.id}</td><td>${p.producto}</td><td>$${p.precio}</td><td>${p.creado_en}</td><td class="acciones"><button class="btn-entregado" onclick="cambiarEstadoPedido(${p.id}, 'entregado')">Entregado</button><button class="btn-cancelar" onclick="cambiarEstadoPedido(${p.id}, 'cancelado')">Cancelar</button></td></tr>`).join('')
-        }
-
-        async function cargarCitas() {
-            const citas = await fetch('/api/citas').then(r => r.json())
-            document.getElementById('tabla-citas').innerHTML = citas.length === 0
-                ? '<tr><td colspan="7" style="text-align:center;color:#888">No hay citas registradas</td></tr>'
-                : citas.map(c => {
-                    const esBloqueada = c.bloqueada === 1
-                    const estadoBadge = esBloqueada ? 'bloqueada' : c.estado
-                    const estadoTexto = esBloqueada ? 'Bloqueada' : c.estado
-                    const nombreMostrar = esBloqueada ? 'Bloqueado: ' + c.nombre : c.nombre
-                    return `<tr><td>#${c.id}</td><td>${nombreMostrar}</td><td>${c.servicio}</td><td>${c.dia}</td><td>${c.hora}</td><td><span class="badge ${estadoBadge}">${estadoTexto}</span></td><td>${c.estado === 'confirmada' ? `<button class="btn-cancelar" onclick="cancelarCita(${c.id})">${esBloqueada ? 'Desbloquear' : 'Cancelar'}</button>` : '-'}</td></tr>`
-                }).join('')
-        }
-
-        async function cargarPedidos() {
-            const pedidos = await fetch('/api/pedidos').then(r => r.json())
-            document.getElementById('tabla-pedidos').innerHTML = pedidos.length === 0
-                ? '<tr><td colspan="6" style="text-align:center;color:#888">No hay pedidos registrados</td></tr>'
-                : pedidos.map(p => `<tr><td>#${p.id}</td><td>${p.producto}</td><td>$${p.precio}</td><td><span class="badge ${p.estado}">${p.estado}</span></td><td>${p.creado_en}</td><td class="acciones">${p.estado === 'recibido' ? `<button class="btn-entregado" onclick="cambiarEstadoPedido(${p.id}, 'entregado')">Entregado</button><button class="btn-cancelar" onclick="cambiarEstadoPedido(${p.id}, 'cancelado')">Cancelar</button>` : '-'}</td></tr>`).join('')
-        }
-
-        async function cargarContactos() {
-            contactosTodos = await fetch('/api/contactos').then(r => r.json())
-            document.getElementById('total-contactos').textContent = contactosTodos.length + ' contactos registrados'
-            const lista = document.getElementById('lista-contactos-masivo')
-            lista.innerHTML = contactosTodos.length === 0
-                ? '<p style="color:#888;text-align:center">No hay contactos aun.</p>'
-                : contactosTodos.map(c => `<div class="contacto-row"><input type="checkbox" id="c-${c.id}" value="${c.numero}" checked><label for="c-${c.id}" style="margin:0;font-weight:normal;cursor:pointer">${c.numero.replace('@c.us', '')} <span style="color:#888;font-size:12px">— ${c.ultimo_mensaje}</span></label></div>`).join('')
-        }
-
-        function seleccionarTodos() {
-            document.querySelectorAll('#lista-contactos-masivo input[type="checkbox"]').forEach(cb => cb.checked = true)
-        }
-
-        function deseleccionarTodos() {
-            document.querySelectorAll('#lista-contactos-masivo input[type="checkbox"]').forEach(cb => cb.checked = false)
-        }
-
-        async function enviarMasivo() {
-            const mensaje = document.getElementById('mensaje-masivo').value.trim()
-            if (!mensaje) { alert('Por favor escribe un mensaje'); return }
-            const seleccionados = Array.from(document.querySelectorAll('#lista-contactos-masivo input[type="checkbox"]:checked'))
-                .map(cb => ({ numero: cb.value }))
-            if (seleccionados.length === 0) { alert('Selecciona al menos un contacto'); return }
-            if (!confirm('Enviar mensaje a ' + seleccionados.length + ' contactos?')) return
-            const res = await fetch('/api/envio-masivo', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ mensaje, contactos: seleccionados })
-            })
-            const data = await res.json()
-            mostrarAlerta('alerta-masivo', data.ok, data.ok ? 'Envio programado! Los mensajes se enviaran en los proximos minutos.' : data.mensaje)
-        }
-
-        async function cambiarEstadoPedido(id, estado) {
-            if (!confirm('Deseas ' + (estado === 'entregado' ? 'marcar como entregado' : 'cancelar') + ' el pedido #' + id + '?')) return
-            await fetch('/api/pedidos/estado/' + id, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ estado })
-            })
-            cargarPedidos()
-            cargarInicio()
-        }
-
-        async function cancelarCita(id) {
-            if (!confirm('Cancelar/desbloquear cita #' + id + '?')) return
-            await fetch('/api/citas/cancelar/' + id, { method: 'POST' })
-            cargarCitas()
-        }
-
-        async function cargarConfig() {
-            const res = await fetch('/api/config')
-            config = await res.json()
-            document.getElementById('nombreNegocio').value = config.nombreNegocio || ''
-            document.getElementById('mensajeBienvenida').value = config.mensajeBienvenida || ''
-            document.getElementById('telefonoAsesor').value = config.telefonoAsesor || ''
-            document.getElementById('horarios').value = config.horarios || ''
-            document.getElementById('horarioApertura').value = config.horarioApertura || 9
-            document.getElementById('horarioCierre').value = config.horarioCierre || 19
-            document.getElementById('tiempoReset').value = config.tiempoReset || 7
-            document.getElementById('intervaloCitas').value = config.intervaloCitas || 60
-            document.getElementById('intervaloMasivo').value = config.intervaloMasivo || 3
-            document.getElementById('delayRespuesta').value = config.delayRespuesta || 2
-            document.getElementById('direccion').value = config.direccion || ''
-            document.getElementById('linkMaps').value = config.linkMaps || ''
-            const menuContenedor = document.getElementById('menu-items')
-            menuContenedor.innerHTML = ''
-            if (config.menuPersonalizado) config.menuPersonalizado.forEach((item, i) => agregarOpcionMenu(item, i))
-            const contenedor = document.getElementById('productos')
-            contenedor.innerHTML = ''
-            if (config.catalogo) config.catalogo.forEach((p, i) => agregarProducto(p, i))
-        }
-
-        function agregarOpcionMenu(item = {}, i = Date.now()) {
-            const div = document.createElement('div')
-            div.className = 'producto'
-            div.id = 'menu-' + i
-            div.innerHTML = `
-                <button class="btn-eliminar" onclick="eliminarOpcionMenu('menu-${i}')">Eliminar</button>
-                <label>Nombre de la opcion</label>
-                <input type="text" placeholder="Ej: Cotizar seguro" value="${item.nombre || ''}" data-campo="nombre">
-                <label>Tipo de accion</label>
-                <select data-campo="tipo" onchange="toggleRespuesta(this)">
-                    <option value="respuesta" ${!item.tipo || item.tipo === 'respuesta' ? 'selected' : ''}>Respuesta personalizada</option>
-                    <option value="catalogo" ${item.tipo === 'catalogo' ? 'selected' : ''}>Mostrar catalogo</option>
-                    <option value="horarios" ${item.tipo === 'horarios' ? 'selected' : ''}>Mostrar horarios</option>
-                    <option value="ubicacion" ${item.tipo === 'ubicacion' ? 'selected' : ''}>Mostrar ubicacion</option>
-                    <option value="cita" ${item.tipo === 'cita' ? 'selected' : ''}>Agendar cita</option>
-                    <option value="cancelar_cita" ${item.tipo === 'cancelar_cita' ? 'selected' : ''}>Cancelar cita</option>
-                    <option value="asesor" ${item.tipo === 'asesor' ? 'selected' : ''}>Hablar con asesor</option>
-                    <option value="pedido" ${item.tipo === 'pedido' ? 'selected' : ''}>Hacer pedido</option>
-                </select>
-                <div class="campo-respuesta" style="${item.tipo && item.tipo !== 'respuesta' ? 'display:none' : ''}">
-                    <label>Respuesta personalizada</label>
-                    <textarea data-campo="respuesta" placeholder="Escribe la respuesta que dara el bot...">${item.respuesta || ''}</textarea>
-                </div>`
-            document.getElementById('menu-items').appendChild(div)
-        }
-
-        function toggleRespuesta(select) {
-            select.closest('.producto').querySelector('.campo-respuesta').style.display = select.value === 'respuesta' ? '' : 'none'
-        }
-
-        function eliminarOpcionMenu(id) { document.getElementById(id).remove() }
-
-        function obtenerMenu() {
-            return Array.from(document.querySelectorAll('#menu-items .producto')).map((div, i) => ({
-                id: i + 1, opcion: String(i + 1),
-                nombre: div.querySelector('[data-campo="nombre"]').value,
-                tipo: div.querySelector('[data-campo="tipo"]').value,
-                respuesta: div.querySelector('[data-campo="respuesta"]')?.value || ''
-            }))
-        }
-
-        function agregarProducto(p = {}, i = Date.now()) {
-            const div = document.createElement('div')
-            div.className = 'producto'
-            div.id = 'prod-' + i
-            div.innerHTML = `
-                <button class="btn-eliminar" onclick="eliminarProducto('prod-${i}')">Eliminar</button>
-                <label>Nombre</label>
-                <input type="text" placeholder="Ej: Consulta general" value="${p.nombre || ''}" data-campo="nombre">
-                <label>Precio</label>
-                <input type="number" placeholder="Ej: 150" value="${p.precio || ''}" data-campo="precio">
-                <div class="disponible">
-                    <input type="checkbox" ${p.disponible !== false ? 'checked' : ''} data-campo="disponible">
-                    <label style="margin:0">Disponible</label>
-                </div>`
-            document.getElementById('productos').appendChild(div)
-        }
-
-        function eliminarProducto(id) { document.getElementById(id).remove() }
-
-        function obtenerProductos() {
-            return Array.from(document.querySelectorAll('#productos .producto')).map((div, i) => ({
-                id: i + 1,
-                nombre: div.querySelector('[data-campo="nombre"]').value,
-                precio: parseFloat(div.querySelector('[data-campo="precio"]').value) || 0,
-                disponible: div.querySelector('[data-campo="disponible"]').checked
-            }))
-        }
-
-        async function guardar() {
-            const nuevo = {
-                ...config,
-                nombreNegocio: document.getElementById('nombreNegocio').value,
-                mensajeBienvenida: document.getElementById('mensajeBienvenida').value,
-                telefonoAsesor: document.getElementById('telefonoAsesor').value,
-                horarios: document.getElementById('horarios').value,
-                horarioApertura: parseInt(document.getElementById('horarioApertura').value),
-                horarioCierre: parseInt(document.getElementById('horarioCierre').value),
-                tiempoReset: parseInt(document.getElementById('tiempoReset').value) || 7,
-                intervaloCitas: parseInt(document.getElementById('intervaloCitas').value) || 60,
-                intervaloMasivo: parseInt(document.getElementById('intervaloMasivo').value) || 3,
-                delayRespuesta: parseInt(document.getElementById('delayRespuesta').value) || 2,
-                direccion: document.getElementById('direccion').value,
-                linkMaps: document.getElementById('linkMaps').value,
-                menuPersonalizado: obtenerMenu(),
-                catalogo: obtenerProductos()
-            }
-            const res = await fetch('/api/config', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(nuevo)
-            })
-            const data = await res.json()
-            mostrarAlerta('alerta', data.ok, data.mensaje)
         }
 
         function mostrarAlerta(id, ok, mensaje) {
@@ -636,8 +192,7 @@
             setTimeout(() => alerta.style.display = 'none', 4000)
         }
 
-        cargarConfig()
-        cargarInicio()
+        cargarLicencias()
     </script>
 </body>
 </html>

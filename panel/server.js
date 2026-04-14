@@ -86,12 +86,8 @@ app.post('/api/admin/licencias/desactivar/:codigo', async (req, res) => {
     }
 })
 
-// Panel HTML
-app.get('/admin', (req, res) => {
-    res.sendFile(join(__dirname, 'index.html'))
-})
-
-app.get('/', (req, res) => {
+// Servir panel
+app.get('*', (req, res) => {
     res.sendFile(join(__dirname, 'index.html'))
 })
 
