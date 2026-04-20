@@ -11,6 +11,17 @@ const app = express()
 app.use(express.json())
 app.use(express.static(__dirname))
 
+console.log('DIAGNOSTICO VARIABLES:')
+console.log('PROJECT_ID:', process.env.FIREBASE_PROJECT_ID ? 'OK' : 'FALTA')
+console.log('PRIVATE_KEY_ID:', process.env.FIREBASE_PRIVATE_KEY_ID ? 'OK' : 'FALTA')
+console.log('PRIVATE_KEY:', process.env.FIREBASE_PRIVATE_KEY ? 'OK (' + process.env.FIREBASE_PRIVATE_KEY.length + ' chars)' : 'FALTA')
+console.log('CLIENT_EMAIL:', process.env.FIREBASE_CLIENT_EMAIL ? 'OK' : 'FALTA')
+console.log('CLIENT_ID:', process.env.FIREBASE_CLIENT_ID ? 'OK' : 'FALTA')
+console.log('CLIENT_X509:', process.env.FIREBASE_CLIENT_X509_CERT_URL ? 'OK' : 'FALTA')
+
+
+
+
 // ─── CONFIGURACION DE FIREBASE DESDE VARIABLES DE ENTORNO ───
 const firebaseKey = {
     type: 'service_account',
