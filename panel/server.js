@@ -1,3 +1,5 @@
+
+import 'dotenv/config'
 import express from 'express'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
@@ -9,53 +11,26 @@ const app = express()
 app.use(express.json())
 app.use(express.static(__dirname))
 
-const PRIVATE_KEY = [
-    '-----BEGIN PRIVATE KEY-----',
-    'MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCgyb/crFvC7OG7',
-    'gX3siCYISTxiD3oKzCDHk9Go+71QVKn25jOyum0OGeR+GIMYFZ75LO7izPfJ1qxB',
-    'dBMGKQDssIYKKnb32ijxlj3WaHZTWh19OPVcqazpXcjnW+CVLHLIQLSOq6ynmUDU',
-    'fYkNLW6kmy/R850LynkOWZ6PxJuB2EXcpQAvhbMdVMdOyovUob+2Pvg+nz/QhsJi',
-    'fhNvQQCLIZUufGczt+97NPNDb0nykD2IF1RsY/2R57YWsHrH+oP+Je5Xth4rkT+H',
-    '3RngTh07CTBhNk5c58U9pjImy1jWZ00IA/ABTi/khH3uUMmBaCTX2SpNTK7sqxvT',
-    'Bme8gsWlAgMBAAECggEAM8nn33cwsy9DYfbKjYYo4eBc76TWhWXMZRwqmshC6P3s',
-    'JNdu7XF4sOMMIsVYbEiChPXBGBI2+a8Imqh9fC1228Xb1qho21pMd8wRrN7GxgAv',
-    'oWbYOPl59Uy86jBAvSus6O1WeuG24eDN7eNlYnYwvhoyI+jYu7SCm2moVdxYzlBN',
-    'Lu02Tu3YXFik7zg2WVvn2UJMOQykGD4ALEabgNFodeWCneAutYmTZH6AnBBq3AAt',
-    'h9xsapuJHVHvir+SpEG1b2vNJQxYJigytHgtNbTWjSAQe9ZgMbb8IvLdC5+KblDp',
-    'IRrhqFHh17n8mbSs2BSyksmDXU260P3SP1aZDM/cfQKBgQDPFROuxl4bflScniC5',
-    '+HEupY1vhaCIobYoJUh+qCKe0AOjGuGQnGkoFHN5w/RQlFjx2x5UGOlOwZG1XBjI',
-    'n+XKM8hieLB6gGPh6Xz/7YZVdVMnuVhhbJEDDPiIzN5sjpCmAYyA8rdXGh/q74QK',
-    'Al4G2Cu3Y1I/yJSUJ9OsRs0vawKBgQDGxRzzlyolzUqXCgFNBTbMNYwaSP+4a9n/',
-    'DUiyY1i5Uwn0BkE+vuN2mEYTY7IkpWd1r1mngPInjqcTuXOAraY5M2MOuqIt1/ja',
-    '7J+nS87Y+1HEpU9H+qUnF4zVFuCc5UMExVdxvBdcO8ZzlrfPKwBVnzCbNC96fudB',
-    'AwcRhh5zLwKBgQCDQqPgQ8LBAJmXULAD0VPEspFtIDF6ia5R0hgamG6hZc74YwCZ',
-    'TltlWVk81JWXQgEDBNY7jjLMhevbHk5jVN8uBRa+PCv46krllr9x5dghcSXNZzF7',
-    'R3q/iUg8RkeyXceYQiESV0cZQej7XOjAA3IgOoOzUZR/858iLgCBEbvbkwKBgC1a',
-    'yNJkSb+6aiywob9bUzeheEh/I6qHIYTrGQ1rUdFnuzutObIBiJGFCWhfNUTbYRIf',
-    'YsuvxpF0IXeEt3BDL0yaBx5TQ7JGN4hsublIuPgV0ICYX9DCxnB3FTGCONpUDcjG',
-    '5r8S9hmbohq551MkMr1Wx5aCf9rpngbdk/1Rpx0NAoGAGnza+4FRvKCUhoTuhBZ0',
-    '0iNdhj4kAYMiloImPpfL1Xl41Rkp+R4cN9yl+Ajmanhp61xj515iJ/uYvAiWh8gB',
-    'hGURF/k0vC9KpSdxcjiPm6CZrb5Tmp6uMnEQdLPlbjGrrbyIlvPjHdHf+wCEN2+h',
-    'TR3E741zrO17VTFHg0T/Wr0=',
-    '-----END PRIVATE KEY-----'
-].join('\n')
-
+// ─── CONFIGURACION DE FIREBASE DESDE VARIABLES DE ENTORNO ───
 const firebaseKey = {
     type: 'service_account',
-    project_id: 'bot-whatsapp-licencias-5dcbf',
-    private_key_id: '783aacf30b64e23de99a65be0e52e95b0e395138',
-    private_key: PRIVATE_KEY,
-    client_email: 'firebase-adminsdk-fbsvc@bot-whatsapp-licencias-5dcbf.iam.gserviceaccount.com',
-    client_id: '106900626375135790130',
+    project_id: process.env.FIREBASE_PROJECT_ID,
+    private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
+    private_key: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    client_email: process.env.FIREBASE_CLIENT_EMAIL,
+    client_id: process.env.FIREBASE_CLIENT_ID,
     auth_uri: 'https://accounts.google.com/o/oauth2/auth',
     token_uri: 'https://oauth2.googleapis.com/token',
     auth_provider_x509_cert_url: 'https://www.googleapis.com/oauth2/v1/certs',
-    client_x509_cert_url: 'https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40bot-whatsapp-licencias-5dcbf.iam.gserviceaccount.com',
+    client_x509_cert_url: process.env.FIREBASE_CLIENT_X509_CERT_URL,
     universe_domain: 'googleapis.com'
 }
 
 let db
 try {
+    if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_PRIVATE_KEY) {
+        throw new Error('Faltan variables de entorno de Firebase')
+    }
     if (!getApps().length) {
         initializeApp({ credential: cert(firebaseKey) })
     }

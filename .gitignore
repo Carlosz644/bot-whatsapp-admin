@@ -5,3 +5,5 @@ node_modules/
 *.log
 *.db
 node_modules/
+firebase-key.json
+.env
